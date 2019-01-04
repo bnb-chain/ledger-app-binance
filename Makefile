@@ -27,7 +27,7 @@ SCRIPT_LD:=$(CURDIR)/script.ld
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
-APPNAME = "COSMOS"
+APPNAME = "Binance Chain"
 APPVERSION_M=1
 APPVERSION_N=0
 APPVERSION_P=1
