@@ -100,8 +100,6 @@ LDLIBS   += -lm -lgcc -lc
 APP_SOURCE_PATH += src deps/jsmn/src deps/ledger-zxlib/include deps/ledger-zxlib/src
 SDK_SOURCE_PATH += lib_stusb lib_u2f lib_stusb_impl
 
-#include $(BOLOS_SDK)/Makefile.glyphs
-
 all: default
 
 load:
@@ -113,9 +111,13 @@ delete:
 package:
 	./pkgdemo.sh ${APPNAME} ${APPVERSION} ${ICONNAME}
 
+glyphs:
+	include $(BOLOS_SDK)/Makefile.glyphs
+
 # Import generic rules from the SDK
 
 include $(BOLOS_SDK)/Makefile.rules
+include $(BOLOS_SDK)/Makefile.glyphs
 
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile.genericwallet
