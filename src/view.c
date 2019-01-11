@@ -46,6 +46,7 @@ void display_transaction_page();
 volatile char transactionDataKey[MAX_CHARS_PER_KEY_LINE];
 volatile char transactionDataValue[MAX_CHARS_PER_VALUE_LINE];
 volatile char pageInfo[MAX_SCREEN_LINE_WIDTH];
+volatile char walletAddress[128];
 const char* dblClickInfo = "DBL-CLICK TO VIEW";
 
 // Index of the currently displayed page
@@ -64,10 +65,13 @@ void start_transaction_info_display(unsigned int unused);
 
 void view_sign_transaction(unsigned int unused);
 
+void populate_wallet_address(unsigned int unused);
+
 void reject(unsigned int unused);
 
 //------ View elements
 const ux_menu_entry_t menu_main[];
+const ux_menu_entry_t menu_address[];
 const ux_menu_entry_t menu_about[];
 
 const ux_menu_entry_t menu_transaction_info[] = {
@@ -83,8 +87,15 @@ const ux_menu_entry_t menu_main[] = {
 #else
     {NULL, NULL, 0, &C_icon_app, "Binance Chain", "Ready", 31, 8},
 #endif
+    {NULL, populate_wallet_address, 0, NULL, "Your address", NULL, 0, 0},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
     {NULL, os_sched_exit, 0, &C_icon_dashboard, "Quit app", NULL, 50, 29},
+    UX_MENU_END
+};
+
+const ux_menu_entry_t menu_address[] = {
+    {NULL, NULL, 0, NULL, (char*) walletAddress, NULL, 0, 0},
+    {menu_main, NULL, 2, &C_icon_back, "Back", NULL, 61, 40},
     UX_MENU_END
 };
 
@@ -117,6 +128,7 @@ static const bagl_element_t bagl_ui_transaction_info_keyscrolling[] = {
 delegate_update_transaction_info event_handler_update_transaction_info = NULL;
 delegate_reject_transaction event_handler_reject_transaction = NULL;
 delegate_sign_transaction event_handler_sign_transaction = NULL;
+delegate_get_address event_handler_get_address = NULL;
 
 void view_add_update_transaction_info_event_handler(delegate_update_transaction_info delegate) {
     event_handler_update_transaction_info = delegate;
@@ -129,6 +141,11 @@ void view_add_reject_transaction_event_handler(delegate_reject_transaction deleg
 void view_add_sign_transaction_event_handler(delegate_sign_transaction delegate) {
     event_handler_sign_transaction = delegate;
 }
+
+void view_show_address_event_handler(delegate_get_address delegate) {
+    event_handler_get_address = delegate;
+}
+
 // ------ Event handlers
 
 const bagl_element_t *ui_transaction_info_prepro(const bagl_element_t *element) {
@@ -343,7 +360,7 @@ void update_transaction_page_info() {
             if (strlen((char *) transactionDataKey) > MAX_SCREEN_LINE_WIDTH) {
                 int value_length = strlen((char *) transactionDataValue);
                 if (value_length > MAX_SCREEN_LINE_WIDTH) {
-                    strcpy((char *) transactionDataValue, "DBL-CLICK FOR VALUE");
+                    strcpy((char *) transactionDataValue, dblClickInfo);
                     scrolling_mode = KEY_SCROLLING_NO_VALUE;
                 } else {
                     scrolling_mode = KEY_SCROLLING_SHORT_VALUE;
@@ -371,6 +388,15 @@ void update_transaction_page_info() {
             transactionDetailsCurrentPage + 1,
             transactionDetailsPageCount);
         break;
+    }
+}
+
+void populate_wallet_address(unsigned int unused) {
+    UNUSED(unused);
+
+    if (event_handler_get_address != NULL) {
+        event_handler_get_address(walletAddress);
+        UX_MENU_DISPLAY(0, menu_address, NULL);
     }
 }
 

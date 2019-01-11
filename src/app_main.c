@@ -18,6 +18,7 @@
 #include "app_main.h"
 #include "view.h"
 #include "lib/transaction.h"
+#include "lib/bech32_addr.h"
 #include "signature.h"
 
 #include <os_io_seproxyhal.h>
@@ -120,15 +121,6 @@ bool extractBip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offse
     }
     memcpy(path, G_io_apdu_buffer + offset + 1, *depth * 4);
     return 1;
-}
-
-void extractPubKey(unsigned char *outputBuffer, cx_ecfp_public_key_t *pubKey) {
-    for (int i = 0; i < 32; i++) {
-        outputBuffer[i] = pubKey->W[64 - i];
-    }
-    if ((pubKey->W[32] & 1) != 0) {
-        outputBuffer[31] |= 0x80;
-    }
 }
 
 bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
@@ -361,6 +353,50 @@ void sign_transaction() {
     }
 }
 
+void get_bech32_address(char* address) {
+    // Generate keys
+    cx_ecfp_public_key_t publicKey;
+    cx_ecfp_private_key_t privateKey;
+    uint8_t privateKeyData[32];
+
+    uint32_t hdp1 = 44;
+    uint32_t hdp2 = 714;
+
+    // harden hd path
+    hdp1 |= 0x80000000;
+    hdp2 |= 0x80000000;
+
+    uint32_t bip32p[] = {hdp1,hdp2,0,0,0,0,0,0,0,0};
+    uint8_t bip32d = 5;
+
+    os_perso_derive_node_bip32(
+        CX_CURVE_256K1,
+        bip32p, bip32d,
+        privateKeyData, NULL);
+
+    keys_secp256k1(&publicKey, &privateKey, privateKeyData);
+    memset(privateKeyData, 0, 32);
+
+    // hash the pubkey
+
+    uint8_t sha256_digest[CX_SHA256_SIZE];
+
+    cx_hash_sha256(publicKey.W,
+                    publicKey.W_len,
+                    sha256_digest,
+                    CX_SHA256_SIZE);
+
+    uint8_t ripemd160_digest[20];
+    cx_ripemd160_t ripemd160_hash;
+    cx_ripemd160_init(&ripemd160_hash);
+    cx_hash((cx_hash_t *)&ripemd160_hash, CX_LAST, sha256_digest, CX_SHA256_SIZE, (unsigned char *) ripemd160_digest, 20);
+    
+    // compute the bech32 address
+    if (bnc_addr_encode(address, "bnc", ripemd160_digest, 20) != 1) {
+        strcpy(address, "error");
+    }
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 void app_main() {
@@ -368,6 +404,7 @@ void app_main() {
 
     view_add_reject_transaction_event_handler(&reject_transaction);
     view_add_sign_transaction_event_handler(&sign_transaction);
+    view_show_address_event_handler(&get_bech32_address);
 
     for (;;) {
         volatile uint16_t sw = 0;
