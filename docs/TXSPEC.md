@@ -9,13 +9,11 @@ Transactions passed to the Ledger device will be in the following format. The Le
 {
   "account_number": {number},
   "chain_id": {string},
-  "fee": {
-    "amount": [{"amount": {number}, "denom": {string}}, ...],
-    "gas": {number}
-  },
-  "memo": {string},
+  "data": {string|null},
+  "memo": {string|null},
   "msgs": [{arbitrary}],
-  "sequence": {number}
+  "sequence": {number},
+  "source": {number}
 }
 ```
 
