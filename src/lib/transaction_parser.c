@@ -300,7 +300,7 @@ int transaction_get_display_key_value(
     int page_index,
     int *chunk_index)
 {
-    const int non_msg_pages_count = 5;
+    const int non_msg_pages_count = 6;
     if (page_index >= 0 && page_index < non_msg_pages_count) {
         const char *key_name;
         switch (page_index) {
@@ -314,10 +314,13 @@ int transaction_get_display_key_value(
                 key_name = "sequence";
                 break;
             case 3:
-                key_name = "fee";
+                key_name = "memo";
                 break;
             case 4:
-                key_name = "memo";
+		key_name = "source";
+                break;
+            case 5:
+                key_name = "data";
                 break;
         }
 
@@ -498,13 +501,6 @@ const char* json_validate(parsed_json_t* parsed_transaction,
     }
 
     if (object_get_value(0,
-                         "fee",
-                         parsed_transaction,
-                         transaction) == -1) {
-        return "Missing fee";
-    }
-
-    if (object_get_value(0,
                          "msgs",
                          parsed_transaction,
                          transaction) == -1) {
@@ -523,6 +519,20 @@ const char* json_validate(parsed_json_t* parsed_transaction,
                          parsed_transaction,
                          transaction) == -1) {
         return "Missing memo";
+    }
+
+    if (object_get_value(0,
+			 "data",
+			 parsed_transaction,
+			 transaction) == -1) {
+        return "Missing data";
+    }
+
+    if (object_get_value(0,
+			 "source",
+			 parsed_transaction,
+			 transaction) == -1) {
+        return "Missing source";
     }
 
     return NULL;

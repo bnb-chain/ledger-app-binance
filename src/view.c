@@ -373,7 +373,7 @@ void update_transaction_page_info() {
         snprintf(
             (char *) pageInfo,
             sizeof(pageInfo),
-            "SECP256K1 - %02d/%02d",
+            "TRANSACTION - %02d/%02d",
             transactionDetailsCurrentPage + 1,
             transactionDetailsPageCount);
         break;
