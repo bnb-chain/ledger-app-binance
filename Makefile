@@ -112,13 +112,10 @@ delete:
 package:
 	./pkgdemo.sh ${APPNAME} ${APPVERSION} ${ICONNAME}
 
-glyphs:
-	include $(BOLOS_SDK)/Makefile.glyphs
-
 # Import generic rules from the SDK
 
 include $(BOLOS_SDK)/Makefile.rules
-include $(BOLOS_SDK)/Makefile.glyphs
+#include $(BOLOS_SDK)/Makefile.glyphs
 
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile.genericwallet
