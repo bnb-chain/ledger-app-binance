@@ -1,4 +1,5 @@
 /*******************************************************************************
+*   (c) 2019 Binance
 *   (c) 2018 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -300,7 +301,7 @@ int transaction_get_display_key_value(
     int page_index,
     int *chunk_index)
 {
-    const int non_msg_pages_count = 6;
+    const int non_msg_pages_count = NON_MSG_PAGES_COUNT;
     if (page_index >= 0 && page_index < non_msg_pages_count) {
         const char *key_name;
         switch (page_index) {
@@ -356,7 +357,7 @@ int transaction_get_display_key_value(
                 subpage_to_display -= count;
             }
 
-            snprintf(key, key_length, "msgs_%d", msgs_array_index+1);
+            snprintf(key, key_length, "msgs_%d", msgs_array_index);
 
             display_arbitrary_item(subpage_to_display,
                                    key,
@@ -385,7 +386,7 @@ int transaction_get_display_pages() {
         int token_index_of_msg = array_get_nth_element(msgs_token_index, i, parsing_context.parsed_transaction);
         msgs_total_pages += display_get_arbitrary_items_count(token_index_of_msg);
     }
-    return msgs_total_pages + 5;
+    return msgs_total_pages + NON_MSG_PAGES_COUNT;
 }
 
 int is_space(char c)

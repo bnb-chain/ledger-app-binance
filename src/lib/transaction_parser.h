@@ -1,4 +1,5 @@
 /*******************************************************************************
+*   (c) 2019 Binance
 *   (c) 2018 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,6 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-
 #pragma once
 
 #include "json_parser.h"
@@ -21,6 +21,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define NON_MSG_PAGES_COUNT    6 
 
 /// Update value characters from json transaction read from the token_index element.
 /// Value is only updated if current_item_index (which is incremented internally) matches item_index_to_display
