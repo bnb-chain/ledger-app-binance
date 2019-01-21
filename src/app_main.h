@@ -1,4 +1,5 @@
 /*******************************************************************************
+*   (c) 2019 Binance
 *   (c) 2016 Ledger
 *   (c) 2018 ZondaX GmbH
 *
@@ -20,7 +21,7 @@
 #include "apdu_codes.h"
 #include "common.h"
 
-#define CLA                             0x55
+#define CLA                             0xBC
 
 #define OFFSET_CLA                      0
 #define OFFSET_INS                      1  //< Instruction offset
