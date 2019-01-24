@@ -94,13 +94,6 @@ const ux_menu_entry_t menu_about[] = {
     UX_MENU_END
 };
 
-static const bagl_element_t bagl_ui_sign_transaction[] = {
-    UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
-    UI_Icon(0, 3, 32 / 2 - 4, 7, 7, BAGL_GLYPH_ICON_CROSS),
-    UI_LabelLine(1, 0, 12, 128, 11, 0xFFFFFF, 0x000000, "Sign transaction"),
-    UI_LabelLine(1, 0, 23, 128, 11, 0xFFFFFF, 0x000000, "Not implemented yet"),
-};
-
 static const bagl_element_t bagl_ui_transaction_info_valuescrolling[] = {
     UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
     UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
@@ -137,14 +130,6 @@ void view_add_sign_transaction_event_handler(delegate_sign_transaction delegate)
     event_handler_sign_transaction = delegate;
 }
 // ------ Event handlers
-
-static unsigned int bagl_ui_sign_transaction_button(unsigned int button_mask,
-                                                    unsigned int button_mask_counter) {
-    switch (button_mask) {
-    default:view_display_transaction_menu(0);
-    }
-    return 0;
-}
 
 const bagl_element_t *ui_transaction_info_prepro(const bagl_element_t *element) {
 
@@ -395,7 +380,8 @@ void view_sign_transaction(unsigned int unused) {
     if (event_handler_sign_transaction != NULL) {
         event_handler_sign_transaction();
     } else {
-        UX_DISPLAY(bagl_ui_sign_transaction, NULL);
+	// this will never happen - the event handler is bound.
+	view_display_transaction_menu(0);
     }
 }
 
