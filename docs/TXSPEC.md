@@ -31,7 +31,7 @@ Transactions passed to the Ledger device will be in the following format. The Le
 
 The Ledger device SHOULD pick a suitable display representation for the transaction.
 
-The key type (secp256k1 / ed25519), `chain_id`, `account_number`, `sequence`, `fee`, and `memo` should be displayed in that order, each on their own page, autoscrolling if necessary.
+The key type (secp256k1), `chain_id`, `account_number`, `sequence`, `fee`, and `memo` should be displayed in that order, each on their own page, autoscrolling if necessary.
 
 `msgs` should be iterated through and each displayed according to the following recursive logic:
 
