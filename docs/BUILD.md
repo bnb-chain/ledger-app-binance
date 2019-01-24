@@ -1,4 +1,4 @@
-#Cosmos User App for Ledger Nano S
+# App for Ledger Nano S
 
 ## Get source
 Apart from cloning, be sure you get all the submodules, by calling:
@@ -11,30 +11,13 @@ or alternatively using ```fix_submodules.sh``` script which can be found in the 
 
 ### Ledger Nano S
 
-This project requires ledger firmware 1.4.2
-
-### Docker CE
-
-Install docker CE following this instructions:
-
-https://docs.docker.com/install/
-
-### CircleCI CLI
-
-CircleCI allows compiling BOLOS firmware both in Linux and MacOS. The CLI will download a docker container ready to run.
-
-To install, follow the instructions here:
-
-https://circleci.com/docs/2.0/local-cli/#installing-the-circleci-local-cli-on-macos-and-linux-distros
+This project requires ledger firmware 1.5.5
 
 ### Ledger Python Tools
 
-Ledger firmware 1.4.2 requires ledgerblue 0.1.18. In most cases, `nanocli.sh` should be able to install all dependencies: 
+Ledger firmware 1.5.5 requires the blue-loader-python and ledgerblue from pip. Please follow the instructions here to get started:
 
-```bash
-./nanocli.sh config
-```
-It is possible that due to recent changes to the firmware/SDK some additional steps might be required.
+https://github.com/LedgerHQ/blue-loader-python/tree/2a04716311c7e18236e59db3ccaa365592f2244b#python-tools-for-ledger-blue-and-nano-s
 
 This tool requires python 2.7 - some versions do not run correclty with python 3.x versions. In order to check which version you are using run this in your terminal:
 ```python --version```
@@ -80,56 +63,17 @@ Additionally you will need to:
 ```
 brew install libusb
 ```
+
 # Building
-There are different local builds:
 
- - Generic C++ code and run unit tests
- - BOLOS firmware
+To build the app, follow ALL of the instructions in the link below to get your BOLOS development environment set up.
 
-## Generic C++ Code / Tests
+https://ledger.readthedocs.io/en/latest/userspace/getting_started.html
 
-This is useful when you want to make changes to libraries, run unit tests, etc. It will build all common libraries and unit tests.
+Then, use the Makefile to build and load the app:
 
-**Compile**
-```
-cmake . && make
-```
-**Run unit tests**
-```
-export GTEST_COLOR=1 && ctest -VV
+```bash
+$ make
+$ make load
 ```
 
-## BOLOS / Ledger firmware
-In order to keep builds reproducible, a bash script is provided.
- The script will build the firmware in a docker container and leave the binary in the correct directory.
-
-**Build**
-
-The following command will build the app firmware inside a container. All output will be available to the host.
-```
-./nanocli.sh umake
-```
-
-**Upload the app to the device**
-The following command will upload the application to the ledger. _Warning: The application will be deleted before uploading._
-```
-./nanocli.sh uload
-```
-
-## Continuous Integration (debugging CI issues)
-This will build in a docker image identical to what CircleCI uses. This provides a clean, reproducible environment. It also can be helpful to debug CI issues.
-
-**To build in ubuntu 16.04 and run C++ unit tests**
-```
-circleci build
-```
-
-**To build BOLOS firmware**
-```
-circleci build --job build_ledger
-```
-
-**To build go client**
-```
-circleci build --job build_go
-```
