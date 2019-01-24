@@ -5,3 +5,5 @@ This is a submodule that only contains the user app according to Ledger specs.
 
 Use `make load` to load it onto a device.
 
+**[Full build instructions](https://github.com/binance-chain/ledger-wallet-app/blob/master/docs/BUILD.md)**
+
