@@ -71,8 +71,8 @@ const ux_menu_entry_t menu_main[];
 const ux_menu_entry_t menu_about[];
 
 const ux_menu_entry_t menu_transaction_info[] = {
-    {NULL, start_transaction_info_display, 0, NULL, "View transaction", NULL, 0, 0},
     {NULL, view_sign_transaction, 0, NULL, "Sign transaction", NULL, 0, 0},
+    {NULL, start_transaction_info_display, 0, NULL, "View transaction", NULL, 0, 0},
     {NULL, reject, 0, &C_icon_back, "Reject", NULL, 60, 40},
     UX_MENU_END
 };
