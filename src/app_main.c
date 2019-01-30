@@ -360,7 +360,7 @@ void get_bech32_address(char *address, const char *hrp) {
     cx_ecfp_private_key_t privateKey;
     uint8_t privateKeyData[32];
     uint8_t pubKeyTemp[33];
-    size_t pubKeySize = 33;
+    size_t pubKeySize = sizeof(pubKeyTemp);
 
     // TODO: improve hardcoded hd path
     uint32_t hdp1 = 44;
@@ -390,7 +390,7 @@ void get_bech32_address(char *address, const char *hrp) {
 
     uint8_t sha256_digest[CX_SHA256_SIZE];
     cx_hash_sha256(pubKeyTemp,
-                    33,
+                    pubKeySize,
                     sha256_digest,
                     CX_SHA256_SIZE);
 
