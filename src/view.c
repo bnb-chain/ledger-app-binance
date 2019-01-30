@@ -46,8 +46,8 @@ void display_transaction_page();
 volatile char transactionDataKey[MAX_CHARS_PER_KEY_LINE];
 volatile char transactionDataValue[MAX_CHARS_PER_VALUE_LINE];
 volatile char pageInfo[MAX_SCREEN_LINE_WIDTH];
-volatile char walletAddress[128];
-const char* dblClickInfo = "DBL-CLICK TO VIEW";
+volatile char walletAddress[64];
+const char* dblClickInfo = "DBL-CLICK VIEW";
 
 // Index of the currently displayed page
 int transactionDetailsCurrentPage;
@@ -65,7 +65,8 @@ void start_transaction_info_display(unsigned int unused);
 
 void view_sign_transaction(unsigned int unused);
 
-void populate_wallet_address(unsigned int unused);
+void populate_wallet_address_main_net(unsigned int unused);
+void populate_wallet_address_test_net(unsigned int unused);
 
 void reject(unsigned int unused);
 
@@ -87,14 +88,15 @@ const ux_menu_entry_t menu_main[] = {
 #else
     {NULL, NULL, 0, &C_icon_app, "Binance Chain", "Ready", 31, 8},
 #endif
-    {NULL, populate_wallet_address, 0, NULL, "Your address", NULL, 0, 0},
+    {menu_address, NULL, 0, NULL, "Your address", NULL, 0, 0},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
     {NULL, os_sched_exit, 0, &C_icon_dashboard, "Quit app", NULL, 50, 29},
     UX_MENU_END
 };
 
 const ux_menu_entry_t menu_address[] = {
-    {NULL, NULL, 0, NULL, (char*) walletAddress, NULL, 0, 0},
+    {NULL, populate_wallet_address_main_net, 0, NULL, "Main net", NULL, 0, 0},
+    {NULL, populate_wallet_address_test_net, 0, NULL, "Test net", NULL, 0, 0},
     {menu_main, NULL, 2, &C_icon_back, "Back", NULL, 61, 40},
     UX_MENU_END
 };
@@ -103,6 +105,12 @@ const ux_menu_entry_t menu_about[] = {
     {NULL, NULL, 0, NULL, "Version", APPVERSION, 0, 0},
     {menu_main, NULL, 2, &C_icon_back, "Back", NULL, 61, 40},
     UX_MENU_END
+};
+
+static const bagl_element_t bagl_ui_your_address[] = {
+    UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
+    UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CROSS),
+    UI_LabelLineScrolling(2, 0, 18, 128, 11, 0xFFFFFF, 0x000000, (char *) walletAddress),
 };
 
 static const bagl_element_t bagl_ui_transaction_info_valuescrolling[] = {
@@ -195,6 +203,13 @@ void menu_right() {
     } else {
         view_display_transaction_menu(0);
     }
+}
+
+static unsigned int bagl_ui_your_address_button(unsigned int button_mask, unsigned int unused2) {
+    if (button_mask & BUTTON_RIGHT) {
+        UX_MENU_DISPLAY(0, menu_address, NULL);
+    }
+    return 0;
 }
 
 static unsigned int bagl_ui_transaction_info_valuescrolling_button(unsigned int button_mask,
@@ -391,12 +406,21 @@ void update_transaction_page_info() {
     }
 }
 
-void populate_wallet_address(unsigned int unused) {
+void populate_wallet_address_main_net(unsigned int unused) {
     UNUSED(unused);
 
     if (event_handler_get_address != NULL) {
-        event_handler_get_address(walletAddress);
-        UX_MENU_DISPLAY(0, menu_address, NULL);
+        event_handler_get_address(walletAddress, "bnb");
+        UX_DISPLAY(bagl_ui_your_address, NULL);
+    }
+}
+
+void populate_wallet_address_test_net(unsigned int unused) {
+    UNUSED(unused);
+
+    if (event_handler_get_address != NULL) {
+        event_handler_get_address(walletAddress, "tbnb");
+        UX_DISPLAY(bagl_ui_your_address, NULL);
     }
 }
 
@@ -406,8 +430,8 @@ void view_sign_transaction(unsigned int unused) {
     if (event_handler_sign_transaction != NULL) {
         event_handler_sign_transaction();
     } else {
-	// this will never happen - the event handler is bound.
-	view_display_transaction_menu(0);
+        // this will never happen - the event handler is bound.
+        view_display_transaction_menu(0);
     }
 }
 

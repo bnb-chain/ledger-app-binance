@@ -34,7 +34,7 @@ extern enum UI_STATE view_uiState;
 typedef int (*delegate_update_transaction_info)(char*,int, char*, int, int, int*);
 typedef void (*delegate_reject_transaction)();
 typedef void (*delegate_sign_transaction)();
-typedef void (*delegate_get_address)(char*);
+typedef void (*delegate_get_address)(char*, const char*);
 
 //------ Event handlers
 /// view_add_update_transaction_info_event_handler

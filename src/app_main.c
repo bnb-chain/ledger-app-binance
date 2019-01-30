@@ -20,6 +20,7 @@
 #include "lib/transaction.h"
 #include "lib/bech32_addr.h"
 #include "signature.h"
+#include "pubkey.h"
 
 #include <os_io_seproxyhal.h>
 #include <os.h>
@@ -353,20 +354,25 @@ void sign_transaction() {
     }
 }
 
-void get_bech32_address(char* address) {
+void get_bech32_address(char *address, const char *hrp) {
     // Generate keys
     cx_ecfp_public_key_t publicKey;
     cx_ecfp_private_key_t privateKey;
     uint8_t privateKeyData[32];
+    uint8_t pubKeyTemp[33];
+    size_t pubKeySize = 33;
 
+    // TODO: improve hardcoded hd path
     uint32_t hdp1 = 44;
     uint32_t hdp2 = 714;
+    uint32_t hdp3 = 0;
 
-    // harden hd path
+    // harden hd path segments
     hdp1 |= 0x80000000;
     hdp2 |= 0x80000000;
+    hdp3 |= 0x80000000;
 
-    uint32_t bip32p[] = {hdp1,hdp2,0,0,0,0,0,0,0,0};
+    uint32_t bip32p[] = {hdp1,hdp2,hdp3,0,0,0,0,0,0,0};
     uint8_t bip32d = 5;
 
     os_perso_derive_node_bip32(
@@ -376,13 +382,15 @@ void get_bech32_address(char* address) {
 
     keys_secp256k1(&publicKey, &privateKey, privateKeyData);
     memset(privateKeyData, 0, 32);
+    memset(&privateKey, 0, sizeof(privateKey));
 
     // hash the pubkey
+    memcpy(pubKeyTemp, publicKey.W, pubKeySize);
+    secp256k1_pubkey_serialize((char *)pubKeyTemp, &pubKeySize, 1);
 
     uint8_t sha256_digest[CX_SHA256_SIZE];
-
-    cx_hash_sha256(publicKey.W,
-                    publicKey.W_len,
+    cx_hash_sha256(pubKeyTemp,
+                    33,
                     sha256_digest,
                     CX_SHA256_SIZE);
 
@@ -392,7 +400,7 @@ void get_bech32_address(char* address) {
     cx_hash((cx_hash_t *)&ripemd160_hash, CX_LAST, sha256_digest, CX_SHA256_SIZE, (unsigned char *) ripemd160_digest, 20);
     
     // compute the bech32 address
-    if (bnc_addr_encode(address, "bnc", ripemd160_digest, 20) != 1) {
+    if (bnc_addr_encode(address, hrp, ripemd160_digest, 20) != 1) {
         strcpy(address, "error");
     }
 }
