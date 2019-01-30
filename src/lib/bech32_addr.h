@@ -19,8 +19,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef _BECH32_ADDR_H_
-#define _BECH32_ADDR_H_ 1
+#pragma once
 
 #include <stdint.h>
 
@@ -58,5 +57,3 @@ int bech32_encode(
 );
 
 int convert_bits(uint8_t* out, size_t* outlen, int outbits, const uint8_t* in, size_t inlen, int inbits, int pad);
-
-#endif
