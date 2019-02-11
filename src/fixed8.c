@@ -24,7 +24,7 @@ int fixed8_str_conv(char *output, char *input) {
     if (strrchr(output, '.')) return 0; // already converted
     char tmp[DECIMAL_SCALE + 1];
     tmp[DECIMAL_SCALE] = '\0'; // just in case
-    if (input_len <= 8) { // satoshi amount
+    if (input_len <= DECIMAL_SCALE) { // satoshi amount
         strcpy(tmp, input);
         output[0] = '0';
         output[1] = '.';
