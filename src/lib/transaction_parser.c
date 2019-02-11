@@ -20,15 +20,17 @@
 #include "transaction_parser.h"
 #include "json_parser.h"
 
+#define SHOW_JSON_STRINGS_AT_LEVEL 2
+
 //---------------------------------------------
 
 const char whitespaces[] = {
-        0x20,// space ' '
+        0x20, // space ' '
         0x0c, // form_feed '\f'
         0x0a, // line_feed, '\n'
         0x0d, // carriage_return, '\r'
         0x09, // horizontal_tab, '\t'
-        0x0b // vertical_tab, '\v'
+        0x0b  // vertical_tab, '\v'
 };
 
 //---------------------------------------------
@@ -145,21 +147,10 @@ int display_arbitrary_item_inner(
     int *current_item_index,
     int level,
     int *chunk_index) {
-//    if level == 2
-//    show value as json-encoded string
-//    else
-//    switch typeof(json) {
-//        case object:
-//            for (key, value) in object:
-//                    show key
-//                    display(value, level + 1)
-//        case array:
-//            for element in array:
-//        display(element, level + 1)
-//        otherwise:
-//        show value as json-encoded string
-//    }
-    if (level == 2) {
+
+    // if level == 2
+    // show value as json-encoded string (shouldn't ever happen)
+    if (level == SHOW_JSON_STRINGS_AT_LEVEL) {
         return display_value(
             value,
             value_length,
@@ -318,7 +309,7 @@ int transaction_get_display_key_value(
                 key_name = "memo";
                 break;
             case 4:
-		key_name = "source";
+                key_name = "source";
                 break;
             case 5:
                 key_name = "data";

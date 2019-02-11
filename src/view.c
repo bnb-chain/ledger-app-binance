@@ -18,6 +18,7 @@
 
 #include "view.h"
 #include "view_templates.h"
+#include "fixed8.h"
 #include "common.h"
 
 #include "glyphs.h"
@@ -354,6 +355,38 @@ void update_transaction_page_info() {
             transactionDetailsCurrentPage,
             &index);
         transactionChunksPageCount = index;
+
+        // Convert Binance order prices, quantities and order meta fields to appropriate display formats
+        char *slash = strrchr((char *)transactionDataKey, '/');
+        if (slash) {
+            if (strcmp(slash, "/price") == 0 || strcmp(slash, "/quantity") == 0) {
+                fixed8_str_conv((char *) transactionDataValue, (char *) transactionDataValue);
+            }
+            else if (strcmp(slash, "/ordertype") == 0) {
+                if (strcmp((char *) transactionDataValue, "1") == 0) {
+                    strcpy((char *) transactionDataValue, "MARKET");
+                }
+                else if (strcmp((char *) transactionDataValue, "2") == 0) {
+                    strcpy((char *) transactionDataValue, "LIMIT");
+                }
+            }
+            else if (strcmp(slash, "/side") == 0) {
+                if (strcmp((char *) transactionDataValue, "1") == 0) {
+                    strcpy((char *) transactionDataValue, "BUY");
+                }
+                else if (strcmp((char *) transactionDataValue, "2") == 0) {
+                    strcpy((char *) transactionDataValue, "SELL");
+                }
+            }
+            else if (strcmp(slash, "/timeinforce") == 0) {
+                if (strcmp((char *) transactionDataValue, "1") == 0) {
+                    strcpy((char *) transactionDataValue, "GTE");
+                }
+                else if (strcmp((char *) transactionDataValue, "3") == 0) {
+                    strcpy((char *) transactionDataValue, "IOC");
+                }
+            }
+        }
 
         // If value is very long we split it into chunks
         // and add chunk index/count information at the of the key
