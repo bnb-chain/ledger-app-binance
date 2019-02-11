@@ -314,6 +314,8 @@ int transaction_get_display_key_value(
             case 5:
                 key_name = "data";
                 break;
+            default:
+                key_name = "????";
         }
 
         strcpy(key, key_name);
