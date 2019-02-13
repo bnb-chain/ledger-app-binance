@@ -18,6 +18,7 @@
 #include <string.h>
 
 #define DECIMAL_SCALE 8
+#define ZERO_FRACTION "00000000"
 
 int fixed8_str_conv(char *output, char *input) {
     size_t input_len = strlen(input);
@@ -28,7 +29,8 @@ int fixed8_str_conv(char *output, char *input) {
         strcpy(tmp, input);
         output[0] = '0';
         output[1] = '.';
-        strcpy(&output[2], tmp);
+        strcpy(&output[2], ZERO_FRACTION);
+        strcpy(&output[2 + (DECIMAL_SCALE - strlen(tmp))], tmp);
         return 1;
     }
     int input_dec_offset = input_len - DECIMAL_SCALE;
