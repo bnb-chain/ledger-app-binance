@@ -21,4 +21,7 @@
 #define SECP256K1_TAG_PUBKEY_ODD 0x03
 #define SECP256K1_TAG_PUBKEY_UNCOMPRESSED 0x04
 
-int secp256k1_pubkey_serialize(char *pub, size_t *size, int compress);
+#define PK_COMPRESSED_LEN   33
+#define PK_UNCOMPRESSED_LEN 65
+
+int secp256k1_pubkey_serialize(uint8_t *pub, size_t *size, int compress);
