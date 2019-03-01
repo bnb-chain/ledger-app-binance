@@ -15,17 +15,12 @@
 ********************************************************************************/
 #include "pubkey.h"
 
-static int secp256k1_pubkey_y_is_odd(char *pubkey) {
-    // https://git.io/fh17s
-    return pubkey[64] & 1;
-}
-
-int secp256k1_pubkey_serialize(char *pubkey, size_t *size, int compress) {
+int secp256k1_pubkey_serialize(uint8_t *pubkey, size_t *size, int compress) {
     if (compress) {
-        *size = 33;
-        pubkey[0] = secp256k1_pubkey_y_is_odd(pubkey) ? SECP256K1_TAG_PUBKEY_ODD : SECP256K1_TAG_PUBKEY_EVEN;
+        *size = PK_COMPRESSED_LEN;
+        pubkey[0] = pubkey[64] & 1 ? SECP256K1_TAG_PUBKEY_ODD : SECP256K1_TAG_PUBKEY_EVEN;
     } else {
-        *size = 65;
+        *size = PK_UNCOMPRESSED_LEN;
         pubkey[0] = SECP256K1_TAG_PUBKEY_UNCOMPRESSED;
     }
     return 1;
