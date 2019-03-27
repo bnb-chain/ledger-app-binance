@@ -71,7 +71,7 @@ The general structure of commands and responses is as follows:
 | P1    | byte (1) | Parameter 1             | ignored  |
 | P2    | byte (1) | Parameter 2             | ignored  |
 | L     | byte (1) | Bytes in payload        | (depends) |
-| PL    | byte (1) | Derivation Path Length  | 3<=PL<=10 |
+| PL    | byte (1) | Derivation Path Length  | 5        |
 | Path[0] | byte (4) | Derivation Path Data    | 44 |
 | Path[1] | byte (4) | Derivation Path Data    | 118 |
 | ..  | byte (4) | Derivation Path Data    |  |
@@ -107,7 +107,7 @@ All other packets/chunks should contain message to sign
 
 | Field | Type     | Content                | Expected |
 | ----- | -------- | ---------------------- | -------- |
-| PL    | byte (1) | Derivation Path Length  | 3<=PL<=10 |
+| PL    | byte (1) | Derivation Path Length  | 5        |
 | Path[0] | byte (4) | Derivation Path Data    | 44 |
 | Path[1] | byte (4) | Derivation Path Data    | 118 |
 | ..  | byte (4) | Derivation Path Data    |  |

@@ -110,7 +110,8 @@ void app_init() {
     view_idle(0);
 }
 
-bool extractBip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offset) {
+// extract_bip32 extracts the bip32 path from the apdu buffer
+bool extract_bip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offset) {
     if (rx < offset + 1) {
         return 0;
     }
@@ -118,10 +119,35 @@ bool extractBip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offse
     *depth = G_io_apdu_buffer[offset];
     const uint16_t req_offset = 4 * *depth + 1 + offset;
 
-    if (rx < req_offset || *depth > 10) {
+    if (rx < req_offset || *depth != 5) {
         return 0;
     }
     memcpy(path, G_io_apdu_buffer + offset + 1, *depth * 4);
+    return 1;
+}
+
+// validate_bnc_bip32 checks the given bip32 path against an expected one
+bool validate_bnc_bip32(uint8_t depth, uint32_t path[10]) {  // path is 10 bytes for compatibility
+    // Only paths in the form 44'/714'/{account}'/0/{index} are supported
+    // placeholder for a user-specified value is 0xFFFFFFFF
+    uint32_t placeholder = 0xFFFFFFFF;
+    uint32_t expected[] = {
+         44 | 0x80000000,  // purpose
+        714 | 0x80000000,  // coin type (chain ID)
+          0 | 0x80000000,  // account
+          0,               // change (no change addresses for now)
+          placeholder,     // address index
+    };
+    if (depth != 5) {
+        return 0;
+    }
+    if (sizeof(expected) / 4 != depth) {
+        return 0;
+    }
+    for (unsigned int i = 0; i < depth; i++) {
+        if (expected[i] == placeholder) continue;
+        if (path[i] != expected[i]) return 0;
+    }
     return 1;
 }
 
@@ -138,7 +164,10 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
         transaction_initialize();
         transaction_reset();
         if (getBip32) {
-            if (!extractBip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
+            if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
+                THROW(APDU_CODE_DATA_INVALID);
+            }
+            if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
                 THROW(APDU_CODE_DATA_INVALID);
             }
             return packageIndex == packageCount;
@@ -183,7 +212,10 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
             }
 
             case INS_PUBLIC_KEY_SECP256K1: {
-                if (!extractBip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
+                if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
+                    THROW(APDU_CODE_DATA_INVALID);
+                }
+                if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
@@ -209,6 +241,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
             case INS_SIGN_SECP256K1: {
                 current_sigtype = SECP256K1;
                 if (!process_chunk(tx, rx, true))
+                    // TODO CODE_OK? if bip32 path isn't right it should possibly be an error
                     THROW(APDU_CODE_OK);
 
                 const char *error_msg = transaction_parse();
@@ -363,17 +396,13 @@ void get_bech32_address(char *address, const char *hrp) {
     uint8_t pubKeyTemp[PK_COMPRESSED_LEN];
     size_t pubKeySize = sizeof(pubKeyTemp);
 
-    // TODO: improve hardcoded hd path
-    uint32_t hdp1 = 44;
-    uint32_t hdp2 = 714;
-    uint32_t hdp3 = 0;
+    // Only paths in the form 44'/714'/{account}'/0/{index} are supported
+    uint32_t hdp0 =  44 | 0x80000000;  // purpose
+    uint32_t hdp1 = 714 | 0x80000000;  // coin type (chain ID)
+    uint32_t hdp2 =   0 | 0x80000000;  // account
+    uint32_t hdp3 =   0;               // change (no change addresses for now)
 
-    // harden hd path segments
-    hdp1 |= 0x80000000;
-    hdp2 |= 0x80000000;
-    hdp3 |= 0x80000000;
-
-    uint32_t bip32p[] = {hdp1,hdp2,hdp3,0,0,0,0,0,0,0};
+    uint32_t bip32p[] = {hdp0,hdp1,hdp2,hdp3,0,0,0,0,0,0};
     uint8_t bip32d = 5;
 
     os_perso_derive_node_bip32(
