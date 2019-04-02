@@ -174,15 +174,11 @@ int tx_getData(
             break;
     }
 
-    // The API is different so we need to temporarily send chunk_index => chunk_count_out
-    int16_t tmp = chunk_index;
-    transaction_get_display_key_value(
+    *chunk_count_out = transaction_get_display_key_value(
             key, max_key_length,
             value, max_value_length,
-            page_index,
-            &tmp);
+            page_index, chunk_index);
 
-    *chunk_count_out = tmp;
     return 0;
 }
 
@@ -290,8 +286,8 @@ void addr_accept() {
     pos += PK_COMPRESSED_LEN;
 
     // Send bech32 addr
-    strcpy((char *) (G_io_apdu_buffer + pos), (char *)viewctl_DataValue);
-    pos += strlen((char *)viewctl_DataValue);
+    strcpy((char *) (G_io_apdu_buffer + pos), (char *) viewctl_DataValue);
+    pos += strlen((char *) viewctl_DataValue);
 
     set_code(G_io_apdu_buffer, pos, APDU_CODE_OK);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, pos + 2);
@@ -341,9 +337,11 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                cx_ecfp_public_key_t publicKey;
-                cx_ecfp_private_key_t privateKey;
-                uint8_t privateKeyData[32];
+                    // INS_PUBLIC_KEY_SECP256K1 will be deprecated in the near future
+                case INS_PUBLIC_KEY_SECP256K1: {
+                    if (!extractBip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
+                        THROW(APDU_CODE_DATA_INVALID);
+                    }
 
                 // Generate keys
                 os_perso_derive_node_bip32(
