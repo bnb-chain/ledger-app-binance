@@ -152,6 +152,160 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
     return packageIndex == packageCount;
 }
 
+//region View Transaction Handlers
+
+int tx_getData(
+        char *title, int max_title_length,
+        char *key, int max_key_length,
+        char *value, int max_value_length,
+        int page_index,
+        int chunk_index,
+        int *page_count_out,
+        int *chunk_count_out) {
+
+    *page_count_out = transaction_get_display_pages();
+
+    switch (current_sigtype) {
+        case SECP256K1:
+            snprintf(title, max_title_length, "SECP256K1 %02d/%02d", page_index + 1, *page_count_out);
+            break;
+        default:
+            snprintf(title, max_title_length, "INVALID!");
+            break;
+    }
+
+    // The API is different so we need to temporarily send chunk_index => chunk_count_out
+    int16_t tmp = chunk_index;
+    transaction_get_display_key_value(
+            key, max_key_length,
+            value, max_value_length,
+            page_index,
+            &tmp);
+
+    *chunk_count_out = tmp;
+    return 0;
+}
+
+void tx_accept_sign() {
+    // Generate keys
+    cx_ecfp_public_key_t publicKey;
+    cx_ecfp_private_key_t privateKey;
+    uint8_t privateKeyData[32];
+
+    unsigned int length = 0;
+    int result = 0;
+    switch (current_sigtype) {
+        case SECP256K1:
+            os_perso_derive_node_bip32(
+                    CX_CURVE_256K1,
+                    bip32_path, bip32_depth,
+                    privateKeyData, NULL);
+
+            keys_secp256k1(&publicKey, &privateKey, privateKeyData);
+            memset(privateKeyData, 0, 32);
+
+            result = sign_secp256k1(
+                    transaction_get_buffer(),
+                    transaction_get_buffer_length(),
+                    G_io_apdu_buffer,
+                    IO_APDU_BUFFER_SIZE,
+                    &length,
+                    &privateKey);
+            break;
+        default:
+            THROW(APDU_CODE_INS_NOT_SUPPORTED);
+            break;
+    }
+    if (result == 1) {
+        set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
+        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+        view_display_signing_success();
+    } else {
+        set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
+        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+        view_display_signing_error();
+    }
+}
+
+void tx_reject() {
+    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+    view_idle(0);
+}
+
+//endregion
+
+//region View Address Handlers
+
+void ripemd160_32(uint8_t *out, uint8_t *in) {
+    cx_ripemd160_t rip160;
+    cx_ripemd160_init(&rip160);
+    cx_hash(&rip160.header, CX_LAST, in, CX_SHA256_SIZE, out, CX_RIPEMD160_SIZE);
+}
+
+#define PK_COMPRESSED_LEN 33
+
+void get_pk_compressed(uint8_t *pkc) {
+    cx_ecfp_public_key_t publicKey;
+    // Modify the last part of the path
+    getPubKey(&publicKey);
+    // "Compress" public key in place
+    publicKey.W[0] = publicKey.W[64] & 1 ? 0x03 : 0x02;
+    memcpy(pkc, publicKey.W, PK_COMPRESSED_LEN);
+}
+
+int addr_getData(char *title, int max_title_length,
+                 char *key, int max_key_length,
+                 char *value, int max_value_length,
+                 int page_index,
+                 int chunk_index,
+                 int *page_count_out,
+                 int *chunk_count_out) {
+
+    *page_count_out = 0x7FFFFFFF;
+    *chunk_count_out = 1;
+
+    snprintf(title, max_title_length, "Account %d", bip32_path[2] & 0x7FFFFFF);
+    snprintf(key, max_key_length, "index %d", page_index);
+
+    bip32_path[bip32_depth - 1] = page_index;
+    uint8_t tmp[PK_COMPRESSED_LEN];
+    get_pk_compressed(tmp);
+
+    // Convert pubkey to address
+    uint8_t hashed_pk[CX_RIPEMD160_SIZE];
+    cx_hash_sha256(tmp, PK_COMPRESSED_LEN, tmp, CX_SHA256_SIZE);
+    ripemd160_32(hashed_pk, tmp);
+
+    // Convert address to bech32
+    bech32EncodeFromBytes(value, bech32_hrp, hashed_pk, CX_RIPEMD160_SIZE);
+
+    return 0;
+}
+
+void addr_accept() {
+    int pos = 0;
+    // Send pubkey
+    get_pk_compressed(G_io_apdu_buffer + pos);
+    pos += PK_COMPRESSED_LEN;
+
+    // Send bech32 addr
+    strcpy((char *) (G_io_apdu_buffer + pos), (char *)viewctl_DataValue);
+    pos += strlen((char *)viewctl_DataValue);
+
+    set_code(G_io_apdu_buffer, pos, APDU_CODE_OK);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, pos + 2);
+    view_idle(0);
+}
+
+void addr_reject() {
+    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+    view_idle(0);
+}
+
+//endregion
+
 void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
     uint16_t sw = 0;
 
