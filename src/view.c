@@ -344,7 +344,7 @@ void start_transaction_info_display(unsigned int unused) {
 void update_transaction_page_info() {
 
     if (event_handler_update_transaction_info != NULL) {
-        int index = transactionChunksPageIndex;
+        int16_t index = transactionChunksPageIndex;
 
         // Read key and value strings from json
         event_handler_update_transaction_info(
@@ -353,7 +353,7 @@ void update_transaction_page_info() {
             (char *) transactionDataValue,
             sizeof(transactionDataValue),
             transactionDetailsCurrentPage,
-            &index);
+            index);
         transactionChunksPageCount = index;
 
         // Convert Binance order prices, quantities and order meta fields to appropriate display formats
@@ -419,24 +419,12 @@ void update_transaction_page_info() {
         }
     }
 
-    switch (current_sigtype) {
-    case SECP256K1:
-        snprintf(
-            (char *) pageInfo,
-            sizeof(pageInfo),
-            "TRANSACTION - %02d/%02d",
-            transactionDetailsCurrentPage + 1,
-            transactionDetailsPageCount);
-        break;
-    default:
-        snprintf(
-            (char *) pageInfo,
-            sizeof(pageInfo),
-            "INVALID - %02d/%02d",
-            transactionDetailsCurrentPage + 1,
-            transactionDetailsPageCount);
-        break;
-    }
+    snprintf(
+        (char *) pageInfo,
+        sizeof(pageInfo),
+        "TRANSACTION - %02d/%02d",
+        transactionDetailsCurrentPage + 1,
+        transactionDetailsPageCount);
 }
 
 void populate_wallet_address_main_net(unsigned int unused) {

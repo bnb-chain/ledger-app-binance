@@ -31,7 +31,7 @@ enum UI_STATE {
 extern enum UI_STATE view_uiState;
 
 //------ Delegates definitions
-typedef int (*delegate_update_transaction_info)(char*,int, char*, int, int, int*);
+typedef int16_t (*delegate_update_transaction_info)(char*,int16_t, char*, int16_t, int16_t, int16_t);
 typedef void (*delegate_reject_transaction)();
 typedef void (*delegate_sign_transaction)();
 typedef void (*delegate_get_address)(char*, const char*);

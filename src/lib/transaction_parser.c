@@ -22,16 +22,17 @@
 
 #define MAX_RECURSION_DEPTH  3
 #define MAX_TREE_LEVEL       2
+#define NON_MSG_PAGES_COUNT  6
 
 //---------------------------------------------
 
 const char whitespaces[] = {
-        0x20, // space ' '
+        0x20,// space ' '
         0x0c, // form_feed '\f'
         0x0a, // line_feed, '\n'
         0x0d, // carriage_return, '\r'
         0x09, // horizontal_tab, '\t'
-        0x0b  // vertical_tab, '\v'
+        0x0b // vertical_tab, '\v'
 };
 
 //---------------------------------------------
@@ -251,7 +252,7 @@ int16_t display_arbitrary_item(int16_t item_index_to_display,
 int16_t transaction_get_display_key_value(char *key, int16_t max_key_length,
                                           char *value, int16_t max_value_length,
                                           int16_t page_index, int16_t chunk_index) {
-    const int16_t non_msg_pages_count = 5;
+    const int16_t non_msg_pages_count = NON_MSG_PAGES_COUNT;
     if (page_index >= 0 && page_index < non_msg_pages_count) {
         const char *key_name;
         switch (page_index) {
@@ -349,7 +350,7 @@ int16_t transaction_get_display_pages() {
         msgs_total_pages += display_get_arbitrary_items_count(token_index_of_msg);
     }
 
-    parsing_context.num_pages = msgs_total_pages + 5;
+    parsing_context.num_pages = msgs_total_pages + NON_MSG_PAGES_COUNT;
     return parsing_context.num_pages;
 }
 
@@ -440,60 +441,60 @@ const char *json_validate(parsed_json_t *parsed_transaction,
                           const char *transaction) {
 
     if (contains_whitespace(parsed_transaction, transaction) == 1) {
-        return "Contains whitespace in the corpus";
+        return "JSON Contains whitespace in the corpus";
     }
 
     if (dictionaries_sorted(parsed_transaction, transaction) != 1) {
-        return "Dictionaries are not sorted";
+        return "JSON Dictionaries are not sorted";
     }
 
     if (object_get_value(0,
                          "chain_id",
                          parsed_transaction,
                          transaction) == -1) {
-        return "Missing chain_id";
+        return "JSON Missing chain_id";
     }
 
     if (object_get_value(0,
                          "sequence",
                          parsed_transaction,
                          transaction) == -1) {
-        return "Missing sequence";
+        return "JSON Missing sequence";
     }
 
     if (object_get_value(0,
                          "msgs",
                          parsed_transaction,
                          transaction) == -1) {
-        return "Missing msgs";
+        return "JSON Missing msgs";
     }
 
     if (object_get_value(0,
                          "account_number",
                          parsed_transaction,
                          transaction) == -1) {
-        return "Missing account_number";
+        return "JSON Missing account_number";
     }
 
     if (object_get_value(0,
                          "memo",
                          parsed_transaction,
                          transaction) == -1) {
-        return "Missing memo";
+        return "JSON Missing memo";
     }
 
     if (object_get_value(0,
-			 "data",
-			 parsed_transaction,
-			 transaction) == -1) {
-        return "Missing data";
+                         "data",
+                         parsed_transaction,
+                         transaction) == -1) {
+        return "JSON Missing data";
     }
 
     if (object_get_value(0,
-			 "source",
-			 parsed_transaction,
-			 transaction) == -1) {
-        return "Missing source";
+                         "source",
+                         parsed_transaction,
+                         transaction) == -1) {
+        return "JSON Missing source";
     }
 
     return NULL;
