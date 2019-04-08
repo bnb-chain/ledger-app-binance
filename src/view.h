@@ -18,10 +18,9 @@
 
 #include "os.h"
 #include "cx.h"
-
-#define MAX_CHARS_PER_KEY_LINE      64
-#define MAX_CHARS_PER_VALUE_LINE    128
-#define MAX_SCREEN_LINE_WIDTH       22
+#include "view_common.h"
+#include "view_expl.h"
+#include "view_conf.h"
 
 enum UI_STATE {
     UI_IDLE,
@@ -30,28 +29,11 @@ enum UI_STATE {
 
 extern enum UI_STATE view_uiState;
 
-//------ Delegates definitions
-typedef int (*delegate_update_transaction_info)(char*,int, char*, int, int, int*);
-typedef void (*delegate_reject_transaction)();
-typedef void (*delegate_sign_transaction)();
-typedef void (*delegate_get_address)(char*, const char*);
-
 //------ Event handlers
-/// view_add_update_transaction_info_event_handler
-/// \param delegate
-void view_add_update_transaction_info_event_handler(delegate_update_transaction_info delegate);
-
-/// view_add_reject_transaction_event_handler
-/// \param delegate
-void view_add_reject_transaction_event_handler(delegate_reject_transaction delegate);
-
-/// view_add_sign_transaction_event_handler
-/// \param delegate
-void view_add_sign_transaction_event_handler(delegate_sign_transaction delegate);
-
-// view_show_address_event_handler
-// \param delegate
-void view_show_address_event_handler(delegate_get_address delegate);
+/// view_set_handlers
+void view_set_handlers(viewctl_delegate_getData func_getData,
+                       viewctl_delegate_accept func_accept,
+                       viewctl_delegate_reject func_reject);
 
 //------ Common functions
 /// view_init
@@ -60,8 +42,26 @@ void view_init(void);
 /// view_idle
 void view_idle(unsigned int ignored);
 
-/// view_display_transaction_menu
-void view_display_transaction_menu(unsigned int ignored);
+/// view_display_tx_menu
+void view_display_tx_menu(unsigned int ignored);
+
+/// view_address_show_main_net
+void view_address_show_main_net(unsigned int unused);
+
+/// view_address_show_test_net
+void view_address_show_test_net(unsigned int unused);
+
+/// view_tx_show
+void view_tx_show(unsigned int start_page);
+
+/// view_sign_transaction
+void view_sign_transaction(unsigned int start_page);
+
+/// view_addr_show
+void view_addr_show(unsigned int start_page);
+
+/// view_addr_confirm
+void view_addr_confirm(unsigned int start_page);
 
 /// view_display_signing_success
 void view_display_signing_success();

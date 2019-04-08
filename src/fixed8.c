@@ -34,7 +34,6 @@ int fixed8_str_conv(char *output, char *input) {
         return 1;
     }
     int input_dec_offset = input_len - DECIMAL_SCALE;
-    char *input_decs = &input[input_dec_offset];
     strcpy(tmp, &input[input_dec_offset]);
     output[input_dec_offset] = '.';
     strncpy(output, input, input_len - DECIMAL_SCALE);

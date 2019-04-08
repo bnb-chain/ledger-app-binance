@@ -1,8 +1,8 @@
 #*******************************************************************************
 #   Ledger App
-#   (c) 2017 Ledger
-#   (c) 2018 ZondaX GmbH
 #   (c) 2019 Binance
+#   (c) 2018 ZondaX GmbH
+#   (c) 2017 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ SCRIPT_LD:=$(CURDIR)/script.ld
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
-APPNAME = "Binance Chain"
+APPNAME="Binance Chain"
 APPVERSION_M=1
 APPVERSION_N=0
 APPVERSION_P=2
@@ -40,6 +40,8 @@ ICONNAME=$(CURDIR)/icon.gif
 # Platform
 
 DEFINES   += UNUSED\(x\)=\(void\)x
+
+DEFINES   += APPNAME=\"$(APPNAME)\"
 
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
@@ -122,4 +124,4 @@ dep/%.d: %.c Makefile.genericwallet
 
 
 listvariants:
-	@echo VARIANTS COIN cosmos
+	@echo VARIANTS COIN binance_chain 

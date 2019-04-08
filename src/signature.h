@@ -40,4 +40,3 @@ int sign_secp256k1(const uint8_t *message,
                    unsigned int signature_capacity,
                    unsigned int *signature_length,
                    cx_ecfp_private_key_t *privateKey);
-
