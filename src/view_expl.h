@@ -1,5 +1,6 @@
 /*******************************************************************************
-*   (c) 2019 Binance
+*   (c) 2016 Ledger
+*   (c) 2018, 2019 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -15,13 +16,14 @@
 ********************************************************************************/
 #pragma once
 
-#include <os.h>
+#include "os.h"
+#include "cx.h"
+#include "view_common.h"
 
-#define SECP256K1_TAG_PUBKEY_EVEN 0x02
-#define SECP256K1_TAG_PUBKEY_ODD 0x03
-#define SECP256K1_TAG_PUBKEY_UNCOMPRESSED 0x04
-
-#define PK_COMPRESSED_LEN   33
-#define PK_UNCOMPRESSED_LEN 65
-
-int secp256k1_pubkey_serialize(uint8_t *pub, size_t *size, int compress);
+// Initialize and show control
+void viewexpl_start(
+        int start_page,
+        viewctl_delegate_getData delegate_update,
+        viewctl_delegate_ready delegate_ready,
+        viewctl_delegate_exit delegate_exit
+        );

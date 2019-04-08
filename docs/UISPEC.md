@@ -22,8 +22,8 @@ UI Specification
 Screen 1. (default)
 ```
 LINE1:
-LINE2:                      Tendermint
-LINE3: [tendermint icon]    Cosmos TEST!   [down icon]
+LINE2:                      Binance Chain
+LINE3: [tendermint icon]    Ready           [down icon]
 ```
 
 Note: Test only appears when the app has been compiled in test mode.

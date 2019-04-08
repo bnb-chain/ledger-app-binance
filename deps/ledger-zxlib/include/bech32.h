@@ -1,6 +1,5 @@
 /*******************************************************************************
-*   (c) 2019 Binance
-*   (c) 2018 ZondaX GmbH
+*   (c) 2019 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,8 +15,18 @@
 ********************************************************************************/
 #pragma once
 
-typedef enum {
-    SECP256K1 = 0
-} sigtype_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern sigtype_t current_sigtype;
+// the following function encodes directly from bytes
+// it will internally convert from 8 to 5 bits and return a
+// zero-terminated string in output
+void bech32EncodeFromBytes(char *output,
+                           const char *hrp,
+                           const uint8_t *data,
+                           size_t data_len);
+
+#ifdef __cplusplus
+}
+#endif
