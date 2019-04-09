@@ -1,6 +1,7 @@
 /*******************************************************************************
 *   (c) 2016 Ledger
 *   (c) 2018, 2019 ZondaX GmbH
+*   (c) 2019 Binance
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -27,6 +28,17 @@
 #include <string.h>
 #include <stdio.h>
 
+// -----
+
+static const bagl_element_t viewexpl_bagl_valuescrolling_first[] = {
+        UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
+        UI_Icon(0, 0, 0, 11, 7, BAGL_GLYPH_ICON_CHECK),
+        UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
+        UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_Title),
+        UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
+        UI_LabelLineScrolling(2, 16, 30, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
+};
+
 static const bagl_element_t viewexpl_bagl_valuescrolling[] = {
         UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
         UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
@@ -34,6 +46,26 @@ static const bagl_element_t viewexpl_bagl_valuescrolling[] = {
         UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_Title),
         UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
         UI_LabelLineScrolling(2, 16, 30, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
+};
+
+static const bagl_element_t viewexpl_bagl_valuescrolling_last[] = {
+        UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
+        UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
+        UI_Icon(0, 128 - 10, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
+        UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_Title),
+        UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
+        UI_LabelLineScrolling(2, 16, 30, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
+};
+
+// -----
+
+static const bagl_element_t viewexpl_bagl_keyscrolling_first[] = {
+        UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
+        UI_Icon(0, 0, 0, 11, 7, BAGL_GLYPH_ICON_CHECK),
+        UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
+        UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_Title),
+        UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
+        UI_LabelLineScrolling(2, 16, 19, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
 };
 
 static const bagl_element_t viewexpl_bagl_keyscrolling[] = {
@@ -44,6 +76,17 @@ static const bagl_element_t viewexpl_bagl_keyscrolling[] = {
         UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
         UI_LabelLineScrolling(2, 16, 19, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
 };
+
+static const bagl_element_t viewexpl_bagl_keyscrolling_last[] = {
+        UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
+        UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
+        UI_Icon(0, 128 - 10, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
+        UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_Title),
+        UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
+        UI_LabelLineScrolling(2, 16, 19, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
+};
+
+// -----
 
 const bagl_element_t *viewexpl_bagl_prepro(const bagl_element_t *element) {
 
@@ -112,15 +155,49 @@ static unsigned int viewexpl_bagl_keyscrolling_button(
     return 0;
 }
 
+static unsigned int viewexpl_bagl_keyscrolling_first_button(
+        unsigned int button_mask,
+        unsigned int button_mask_counter) {
+    return viewexpl_bagl_keyscrolling_button(button_mask, button_mask_counter);
+}
+
+static unsigned int viewexpl_bagl_keyscrolling_last_button(
+        unsigned int button_mask,
+        unsigned int button_mask_counter) {
+    return viewexpl_bagl_keyscrolling_button(button_mask, button_mask_counter);
+}
+
 static unsigned int viewexpl_bagl_valuescrolling_button(
         unsigned int button_mask,
         unsigned int button_mask_counter) {
     return viewexpl_bagl_keyscrolling_button(button_mask, button_mask_counter);
 }
 
-void viewexpl_display_ux() {
+static unsigned int viewexpl_bagl_valuescrolling_first_button(
+        unsigned int button_mask,
+        unsigned int button_mask_counter) {
+    return viewexpl_bagl_valuescrolling_button(button_mask, button_mask_counter);
+}
+
+static unsigned int viewexpl_bagl_valuescrolling_last_button(
+        unsigned int button_mask,
+        unsigned int button_mask_counter) {
+    return viewexpl_bagl_valuescrolling_button(button_mask, button_mask_counter);
+}
+
+void viewexpl_display_ux(int page, int count) {
     if (viewctl_scrolling_mode == VALUE_SCROLLING) {
-        UX_DISPLAY(viewexpl_bagl_valuescrolling, viewexpl_bagl_prepro);
+        if (page == 0) {
+            UX_DISPLAY(viewexpl_bagl_valuescrolling_first, viewexpl_bagl_prepro);
+        } else if (count - 1 <= page) {
+            UX_DISPLAY(viewexpl_bagl_valuescrolling_last, viewexpl_bagl_prepro);
+        } else {
+            UX_DISPLAY(viewexpl_bagl_valuescrolling, viewexpl_bagl_prepro);
+        }
+    } else if (page == 0) {
+        UX_DISPLAY(viewexpl_bagl_keyscrolling_first, viewexpl_bagl_prepro);
+    } else if (count - 1 <= page) {
+        UX_DISPLAY(viewexpl_bagl_keyscrolling_last, viewexpl_bagl_prepro);
     } else {
         UX_DISPLAY(viewexpl_bagl_keyscrolling, viewexpl_bagl_prepro);
     }

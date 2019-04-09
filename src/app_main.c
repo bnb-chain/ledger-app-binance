@@ -1,7 +1,7 @@
 /*******************************************************************************
-*   (c) 2019 Binance
-*   (c) 2018 ZondaX GmbH
 *   (c) 2016 Ledger
+*   (c) 2018 ZondaX GmbH
+*   (c) 2019 Binance
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -40,7 +40,14 @@ const uint8_t privateKeyDataTest[] = {
 #endif
 
 uint8_t bip32_depth;
-uint32_t bip32_path[10];
+uint32_t bip32_path[5];
+
+// the last "viewed" bip32 path is an extra check for security,
+// to ensure that the user has "seen" the address they are using before signing.
+// the app must have validated it (validate_bnc_bip32).
+uint8_t viewed_bip32_depth;
+uint32_t viewed_bip32_path[5];
+
 sigtype_t current_sigtype;
 
 char bech32_hrp[MAX_BECH32_HRP_LEN + 1];
@@ -114,10 +121,21 @@ void app_init() {
     USB_power(0);
     USB_power(1);
     view_idle(0);
+
+    // set the default bip32 path
+    bip32_depth = 5;
+    uint32_t new_bip32_path[] = {
+         44 | 0x80000000,  // purpose
+        714 | 0x80000000,  // coin type (chain ID)
+          0 | 0x80000000,  // account
+          0,               // change (no change addresses for now)
+          0,               // address index
+    };
+    memcpy(bip32_path, new_bip32_path, sizeof(bip32_path));
 }
 
 // extract_bip32 extracts the bip32 path from the apdu buffer
-bool extract_bip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offset) {
+bool extract_bip32(uint8_t *depth, uint32_t path[5], uint32_t rx, uint32_t offset) {
     if (rx < offset + 1) {
         return 0;
     }
@@ -133,7 +151,7 @@ bool extract_bip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offs
 }
 
 // validate_bnc_bip32 checks the given bip32 path against an expected one
-bool validate_bnc_bip32(uint8_t depth, uint32_t path[10]) {  // path is 10 bytes for compatibility
+bool validate_bnc_bip32(uint8_t depth, uint32_t path[5]) {  // path is 10 bytes for compatibility
     // Only paths in the form 44'/714'/{account}'/0/{index} are supported
     // placeholder for a user-specified value is 0xFFFFFFFF
     uint32_t placeholder = 0xFFFFFFFF;
@@ -157,6 +175,11 @@ bool validate_bnc_bip32(uint8_t depth, uint32_t path[10]) {  // path is 10 bytes
     return 1;
 }
 
+void set_hrp(char *hrp) {
+    strcpy(bech32_hrp, hrp);
+    bech32_hrp_len = strlen(bech32_hrp);
+}
+
 bool extract_hrp(uint8_t *len, char *hrp, uint32_t rx, uint32_t offset) {
     if (rx < offset + 1) {
         THROW(APDU_CODE_DATA_INVALID);
@@ -170,6 +193,14 @@ bool extract_hrp(uint8_t *len, char *hrp, uint32_t rx, uint32_t offset) {
 
     memcpy(hrp, G_io_apdu_buffer + offset + 1, *len);
     hrp[*len] = 0; // zero terminate
+    return 1;
+}
+
+bool validate_bnc_hrp(char *hrp) {
+    // only accept known bnc hrps
+    if (strcmp("bnb", hrp) != 0 && strcmp("tbnb", hrp) != 0) {
+        THROW(APDU_CODE_DATA_INVALID);
+    }
     return 1;
 }
 
@@ -203,6 +234,18 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
             if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
                 THROW(APDU_CODE_DATA_INVALID);
             }
+            if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
+                THROW(APDU_CODE_DATA_INVALID);
+            }
+            
+            // must be the last bip32 the user "saw" for signing to work.
+            if (bip32_depth != viewed_bip32_depth) {
+                THROW(APDU_CODE_DATA_INVALID);
+            }
+            if (memcmp(bip32_path, viewed_bip32_path, sizeof(viewed_bip32_path)) != 0) {
+                THROW(APDU_CODE_DATA_INVALID);
+            }
+
             return packageIndex == packageCount;
         }
     }
@@ -229,7 +272,7 @@ int tx_getData(
 
     switch (current_sigtype) {
         case SECP256K1:
-            snprintf(title, max_title_length, "TRANSACTION - %02d/%02d", page_index + 1, *page_count_out);
+            snprintf(title, max_title_length, "PREVIEW - %02d/%02d", page_index + 1, *page_count_out);
             break;
         default:
             snprintf(title, max_title_length, "INVALID!");
@@ -324,7 +367,7 @@ int addr_getData(char *title, int max_title_length,
     *chunk_count_out = 1;
 
     snprintf(title, max_title_length, "Account %d", bip32_path[2] & 0x7FFFFFF);
-    snprintf(key, max_key_length, "index %d", page_index);
+    snprintf(key, max_key_length, "Address %d", page_index);
 
     bip32_path[bip32_depth - 1] = page_index;
     uint8_t tmp[PK_COMPRESSED_LEN];
@@ -403,7 +446,6 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
-
                     if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
@@ -414,6 +456,10 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     os_memmove(G_io_apdu_buffer, publicKey.W, 65);
                     *tx += 65;
 
+                    // must be the last bip32 the user "saw" for signing to work.
+                    viewed_bip32_depth = bip32_depth;
+                    memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
+
                     THROW(APDU_CODE_OK);
                     break;
                 }
@@ -423,17 +469,22 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     if (!extract_hrp(&bech32_hrp_len, bech32_hrp, rx, OFFSET_DATA)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
-
+                    if (!validate_bnc_hrp(bech32_hrp)) {
+                        THROW(APDU_CODE_DATA_INVALID);
+                    }
                     if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA + bech32_hrp_len + 1)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
-
                     if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
 
                     view_set_handlers(addr_getData, NULL, NULL);
                     view_addr_show(bip32_path[4] & 0x7FFFFFF);
+
+                    // must be the last bip32 the user "saw" for signing to work.
+                    viewed_bip32_depth = bip32_depth;
+                    memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
 
                     *flags |= IO_ASYNCH_REPLY;
                     break;
@@ -444,17 +495,22 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     if (!extract_hrp(&bech32_hrp_len, bech32_hrp, rx, OFFSET_DATA)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
-
+                    if (!validate_bnc_hrp(bech32_hrp)) {
+                        THROW(APDU_CODE_DATA_INVALID);
+                    }
                     if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA + bech32_hrp_len + 1)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
-
                     if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
 
                     view_set_handlers(addr_getData, addr_accept, addr_reject);
                     view_addr_confirm(bip32_path[4] & 0x7FFFFFF);
+
+                    // must be the last bip32 the user "saw" for signing to work.
+                    viewed_bip32_depth = bip32_depth;
+                    memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
 
                     *flags |= IO_ASYNCH_REPLY;
                     break;

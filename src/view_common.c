@@ -195,5 +195,5 @@ void viewctl_display_page() {
     asciify((char *) viewctl_DataKey);
     asciify((char *) viewctl_DataValue);
 
-    viewctl_display_ux();
+    viewctl_display_ux(viewctl_DetailsCurrentPage, viewctl_DetailsPageCount);
 }
