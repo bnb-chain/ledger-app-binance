@@ -71,7 +71,7 @@ int16_t transaction_get_display_key_value(char *key,
                                           int16_t chunk_index);
 
 /// Return number of UI pages that we'll have for the current json transaction (only if the tx is valid)
-/// \return number of pages (msg pages + 5 required)
+/// \return number of pages (msg pages + 6 required)
 int16_t transaction_get_display_pages();
 
 /// Validate json transaction

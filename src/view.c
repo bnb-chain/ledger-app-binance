@@ -1,7 +1,7 @@
 /*******************************************************************************
-*   (c) 2019 Binance
 *   (c) 2016 Ledger
 *   (c) 2018 ZondaX GmbH
+*   (c) 2019 Binance
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include "view_expl.h"
 #include "view_conf.h"
 #include "common.h"
+#include "app_main.h"
 
 #include "glyphs.h"
 #include "bagl.h"
@@ -38,12 +39,12 @@ void reject(unsigned int unused);
 
 //------ View elements
 const ux_menu_entry_t menu_main[];
-// const ux_menu_entry_t menu_address[];
+const ux_menu_entry_t menu_address[];
 const ux_menu_entry_t menu_about[];
 
 const ux_menu_entry_t menu_transaction_info[] = {
-        {NULL, view_tx_show, 0, NULL, "View transaction", NULL, 0, 0},
         {NULL, view_sign_transaction, 0, NULL, "Sign transaction", NULL, 0, 0},
+        {NULL, view_tx_show, 0, NULL, "Preview again", NULL, 0, 0},
         {NULL, reject, 0, &C_icon_back, "Reject", NULL, 60, 40},
         UX_MENU_END
 };
@@ -54,18 +55,18 @@ const ux_menu_entry_t menu_main[] = {
 #else
     {NULL, NULL, 0, &C_icon_app, "Binance Chain", "Ready", 31, 8},
 #endif
-    // {menu_address, NULL, 0, NULL, "Your address", NULL, 0, 0},
+    {menu_address, NULL, 0, NULL, "Your addresses", NULL, 0, 0},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
     {NULL, os_sched_exit, 0, &C_icon_dashboard, "Quit app", NULL, 50, 29},
     UX_MENU_END
 };
 
-// const ux_menu_entry_t menu_address[] = {
-//     {NULL, view_address_show_main_net, 0, NULL, "Main net", NULL, 0, 0},
-//     {NULL, view_address_show_test_net, 0, NULL, "Test net", NULL, 0, 0},
-//     {menu_main, NULL, 2, &C_icon_back, "Back", NULL, 61, 40},
-//     UX_MENU_END
-// };
+const ux_menu_entry_t menu_address[] = {
+    {NULL, view_address_show_main_net, 0, NULL, "Main net", NULL, 0, 0},
+    {NULL, view_address_show_test_net, 0, NULL, "Test net", NULL, 0, 0},
+    {menu_main, NULL, 2, &C_icon_back, "Back", NULL, 61, 40},
+    UX_MENU_END
+};
 
 const ux_menu_entry_t menu_about[] = {
         {NULL, NULL, 0, NULL, "Version", APPVERSION, 0, 0},
@@ -92,6 +93,38 @@ void view_set_handlers(viewctl_delegate_getData func_getData,
 void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default((bagl_element_t *) element);
 }
+
+/////////////////////////////////
+
+void user_view_addr_exit(unsigned int unused) {
+    view_idle(0);
+}
+
+void view_address_show_main_net(unsigned int unused) {
+    UNUSED(unused);
+
+    set_hrp("bnb");
+    view_set_handlers(addr_getData, NULL, NULL);
+    viewexpl_start(0,
+                   ehGetData,   // update
+                   NULL,        // ready
+                   user_view_addr_exit // exit
+    );
+}
+
+void view_address_show_test_net(unsigned int unused) {
+    UNUSED(unused);
+
+    set_hrp("tbnb");
+    view_set_handlers(addr_getData, NULL, NULL);
+    viewexpl_start(0,
+                   ehGetData,   // update
+                   NULL,        // ready
+                   user_view_addr_exit // exit
+    );
+}
+
+/////////////////////////////////
 
 void view_tx_show(unsigned int start_page) {
     if (ehGetData == NULL) { return; }

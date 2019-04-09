@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   (c) 2019 Binance
 *   (c) 2018 ZondaX GmbH
+*   (c) 2019 Binance
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include "transaction_parser.h"
 #include "json_parser.h"
+#include "fixed8.h"
 
 #define MAX_RECURSION_DEPTH  3
 #define MAX_TREE_LEVEL       2
@@ -114,7 +115,57 @@ int16_t update(char *out, const int16_t out_len, const int16_t token_index, uint
 ///// If value is updated, we also update view_scrolling_total_size to value string length.
 int16_t retrieve_value(display_context_params_t *p, int16_t token_index) {
     if (p->item_index == p->item_index_to_display) {
-        return update(p->value, p->value_length, token_index, p->chunk_index);
+        int16_t ret = update(p->value, p->value_length, token_index, p->chunk_index);
+
+        // Convert Binance Chain order prices, quantities and order meta fields to friendly display values
+        // msg keys are at the "root"
+        bool modified = false;
+        if (strcmp(p->key, "price") == 0 
+                || strcmp(p->key, "quantity") == 0) {
+            fixed8_str_conv(p->value, p->value);
+            modified = true;
+        }
+        else if (strcmp(p->key, "ordertype") == 0) {
+            if (strcmp(p->value, "1") == 0) {
+                strcpy(p->value, "MARKET");
+                modified = true;
+            }
+            else if (strcmp(p->value, "2") == 0) {
+                strcpy(p->value, "LIMIT");
+                modified = true;
+            }
+        }
+        else if (strcmp(p->key, "side") == 0) {
+            if (strcmp(p->value, "1") == 0) {
+                strcpy(p->value, "BUY");
+                modified = true;
+            }
+            else if (strcmp(p->value, "2") == 0) {
+                strcpy(p->value, "SELL");
+                modified = true;
+            }
+        }
+        else if (strcmp(p->key, "timeinforce") == 0) {
+            if (strcmp(p->value, "1") == 0) {
+                strcpy(p->value, "GTE");
+                modified = true;
+            }
+            else if (strcmp(p->value, "3") == 0) {
+                strcpy(p->value, "IOC");
+                modified = true;
+            }
+        }
+        else {
+            char *slash = strrchr(p->key, '/');
+            if (slash && strcmp(slash, "/amount") == 0) {
+                fixed8_str_conv(p->value, p->value);
+                modified = true;
+            }
+        }
+        if (modified) {
+            p->value_length = strlen(p->value);
+        }
+        return ret;
     }
 
     p->item_index++;
@@ -350,7 +401,7 @@ int16_t transaction_get_display_pages() {
         msgs_total_pages += display_get_arbitrary_items_count(token_index_of_msg);
     }
 
-    parsing_context.num_pages = msgs_total_pages + 5;
+    parsing_context.num_pages = msgs_total_pages + NON_MSG_PAGES_COUNT;
     return parsing_context.num_pages;
 }
 

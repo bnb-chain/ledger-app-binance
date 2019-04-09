@@ -152,7 +152,9 @@ All other packets/chunks should contain message to sign
 | ..         | byte (4)       | Derivation Path Data   |                |
 | Path[PL-1] | byte (4)       | Derivation Path Data   |                |
 
-First three items in the derivation path will be hardened automatically hardened
+First three items in the derivation path will be automatically hardened
+
+--------------
 
 ### INS_GET_ADDR_SECP256K1
 

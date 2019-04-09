@@ -66,7 +66,7 @@ typedef void (*viewctl_delegate_exit)(unsigned int ignored);
 typedef void (*viewctl_delegate_ready)(unsigned int ignored);
 
 // Delegate to handle exit view event
-typedef void (*viewctl_delegate_display_ux)();
+typedef void (*viewctl_delegate_display_ux)(int page, int count);
 
 // Delegate to handle an accept event
 typedef void (*viewctl_delegate_accept)();
