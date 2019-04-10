@@ -20,7 +20,7 @@
 #define DECIMAL_SCALE 8
 #define ZERO_FRACTION "00000000"
 
-int fixed8_str_conv(char *output, char *input) {
+int fixed8_str_conv(char *output, char *input, char terminator) {
     size_t input_len = strlen(input);
     if (strrchr(output, '.')) return 0; // already converted
     char tmp[DECIMAL_SCALE + 1];
@@ -30,7 +30,9 @@ int fixed8_str_conv(char *output, char *input) {
         output[0] = '0';
         output[1] = '.';
         strcpy(&output[2], ZERO_FRACTION);
-        strcpy(&output[2 + (DECIMAL_SCALE - strlen(tmp))], tmp);
+        int add_decs = DECIMAL_SCALE - strlen(tmp);
+        strcpy(&output[2 + add_decs], tmp);
+        output[input_len + 2 + add_decs] = terminator;
         return 1;
     }
     int input_dec_offset = input_len - DECIMAL_SCALE;
@@ -38,6 +40,6 @@ int fixed8_str_conv(char *output, char *input) {
     output[input_dec_offset] = '.';
     strncpy(output, input, input_len - DECIMAL_SCALE);
     strcpy(&output[input_dec_offset + 1], tmp);
-    output[input_len + 1] = '\0';
+    output[input_len + 1] = terminator;
     return 1;
 }

@@ -28,18 +28,22 @@
 //---------------------------------------------
 
 const char whitespaces[] = {
-        0x20,// space ' '
+        0x20, // space ' '
         0x0c, // form_feed '\f'
         0x0a, // line_feed, '\n'
         0x0d, // carriage_return, '\r'
         0x09, // horizontal_tab, '\t'
-        0x0b // vertical_tab, '\v'
+        0x0b  // vertical_tab, '\v'
 };
 
 //---------------------------------------------
 
 int16_t msgs_total_pages = 0;
 int16_t msgs_array_elements = 0;
+
+//---------------------------------------------
+
+const char *amtstr = "amount:";
 
 //---------------------------------------------
 
@@ -78,6 +82,36 @@ void strcat_s(char *dst, uint16_t dst_max, const char *src, uint16_t src_size) {
     *(p + src_size) = 0;
 }
 
+char *replace_word(char* str, char* word, char* subst) {
+    int len  = strlen(str);
+    int lena = strlen(word), lenb = strlen(subst);
+    for (char* p = str; (p = strstr(p, word)); ++p) {
+        if (lena != lenb)  // shift end as needed
+            memmove(p+lenb, p+lena, len - (p - str) + lenb);
+        memcpy(p, subst, lenb);
+    }
+    return str;
+}
+
+char *replace_chrs(char *str, char *chrs, char *subst) {
+    int16_t chrslen = strlen(chrs);
+    char chr[2];
+    chr[1] = '\0';
+    for (int16_t i = 0; i < chrslen; i++) {
+        int len  = strlen(str);
+        int lensub = strlen(subst);
+        chr[0] = *chrs;
+        for (char* p = str; (p = strstr(p, chr)); ++p) {
+            if (1 != lensub)
+                memmove(p+lensub, p+1, len - (p - str) + lensub);
+            memcpy(p, subst, lensub);
+        }
+        chrs++;
+    }
+    return str;
+}
+
+
 //--------------------------------------
 // Transaction parsing helper functions
 //--------------------------------------
@@ -110,58 +144,92 @@ int16_t update(char *out, const int16_t out_len, const int16_t token_index, uint
     return num_chunks;
 }
 
+///// Prettifies a "coins" object for better human-readability
+///// The end result is like: "200.123456 BNB,  0.02000000 NNB-2AB"
+void reformat_coins(display_context_params_t *p) {
+    // remove some json chars
+    replace_chrs(p->value, "[{}]\"", "");
+
+    // special handling for "denom" - remove it
+    replace_word(p->value, "denom:", "    ");
+
+    // begin int to decimal formatting
+    char *comma;
+    char *amount = p->value;
+    // there might be multiple "amounts" in "coins", so handle all of them
+    while ((amount = strstr(amount, "amount:")) != NULL) {
+        comma = strchr(amount, ',');
+        *comma = '\0';
+        fixed8_str_conv(amount + 7, amount + 7, ' ');
+        amount = comma; // next
+    }
+
+    // remove "amount:" too because why not
+    replace_word(p->value, "amount:", "");
+
+    // normalize spacing
+    replace_word(p->value, "  ", " ");
+
+    // add spacing after commas (if any)
+    replace_chrs(p->value, ",", ",  ");
+}
+
 ///// Update value characters from json transaction read from the token_index element.
 ///// Value is only updated if current_item_index (which is incremented internally) matches item_index_to_display
 ///// If value is updated, we also update view_scrolling_total_size to value string length.
-int16_t retrieve_value(display_context_params_t *p, int16_t token_index) {
+int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntype_t token_type) {
     if (p->item_index == p->item_index_to_display) {
         int16_t ret = update(p->value, p->value_length, token_index, p->chunk_index);
 
-        // Convert Binance Chain order prices, quantities and order meta fields to friendly display values
-        // msg keys are at the "root"
-        bool modified = false;
-        if (strcmp(p->key, "price") == 0 
+        // "prettify" some values when displayed
+        // if/when the value is modified for prettification this flag will be flipped
+        bool modified = true;
+
+        // reformat JSMN_OBJECT, JSMN_ARRAY
+        // e.g. [{"amount":10000000000,"denom":"BNB"}]
+        // becomes: amount:100.00000000, denom:BNB
+        if (token_type == JSMN_OBJECT || token_type == JSMN_ARRAY) {
+            reformat_coins(p);
+        }
+
+        // present Binance Chain order prices, quantities and order meta fields in a nicer way
+        else if (strcmp(p->key, "price") == 0
                 || strcmp(p->key, "quantity") == 0) {
-            fixed8_str_conv(p->value, p->value);
-            modified = true;
+            fixed8_str_conv(p->value, p->value, '\0');
         }
         else if (strcmp(p->key, "ordertype") == 0) {
             if (strcmp(p->value, "1") == 0) {
                 strcpy(p->value, "MARKET");
-                modified = true;
             }
             else if (strcmp(p->value, "2") == 0) {
                 strcpy(p->value, "LIMIT");
-                modified = true;
             }
         }
         else if (strcmp(p->key, "side") == 0) {
             if (strcmp(p->value, "1") == 0) {
                 strcpy(p->value, "BUY");
-                modified = true;
             }
             else if (strcmp(p->value, "2") == 0) {
                 strcpy(p->value, "SELL");
-                modified = true;
             }
         }
         else if (strcmp(p->key, "timeinforce") == 0) {
             if (strcmp(p->value, "1") == 0) {
                 strcpy(p->value, "GTE");
-                modified = true;
             }
             else if (strcmp(p->value, "3") == 0) {
                 strcpy(p->value, "IOC");
-                modified = true;
             }
         }
         else {
             char *slash = strrchr(p->key, '/');
             if (slash && strcmp(slash, "/amount") == 0) {
-                fixed8_str_conv(p->value, p->value);
-                modified = true;
+                fixed8_str_conv(p->value, p->value, '\0');
+            } else {
+                modified = false;
             }
         }
+
         if (modified) {
             p->value_length = strlen(p->value);
         }
@@ -210,7 +278,7 @@ int16_t display_arbitrary_item_inner(display_context_params_t *p, int16_t token_
         token_type == JSMN_STRING ||
         token_type == JSMN_PRIMITIVE) {
         // Early bail out
-        return retrieve_value(p, token_index);
+        return retrieve_value(p, token_index, token_type);
     }
 
     const int16_t el_count = object_get_element_count(token_index, parsing_context.parsed_tx);
