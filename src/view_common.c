@@ -35,7 +35,6 @@ enum UI_DISPLAY_MODE viewctl_scrolling_mode;
 volatile char viewctl_DataKey[MAX_CHARS_PER_KEY_LINE];
 volatile char viewctl_DataValue[MAX_CHARS_PER_VALUE_LINE];
 volatile char viewctl_Title[MAX_SCREEN_LINE_WIDTH];
-const char *dblClickInfo = "...Press both buttons...";
 
 int viewctl_DetailsCurrentPage;
 int viewctl_DetailsPageCount;
@@ -179,8 +178,8 @@ void viewctl_display_page() {
             if (strlen((char *) viewctl_DataKey) > MAX_SCREEN_LINE_WIDTH) {
                 int value_length = strlen((char *) viewctl_DataValue);
                 if (value_length > MAX_SCREEN_LINE_WIDTH) {
-                    strcpy((char *) viewctl_DataValue, "...Press both buttons...");
-                    viewctl_scrolling_mode = KEY_SCROLLING_NO_VALUE;
+                    viewctl_crop_key();
+                    viewctl_scrolling_mode = VALUE_SCROLLING;
                 } else {
                     viewctl_scrolling_mode = KEY_SCROLLING_SHORT_VALUE;
                 }

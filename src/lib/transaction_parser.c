@@ -151,7 +151,8 @@ void reformat_coins(display_context_params_t *p) {
     replace_chrs(p->value, "[{}]\"", "");
 
     // special handling for "denom" - remove it
-    replace_word(p->value, "denom:", "    ");
+    // allow enough room for conversion of a 0.00000001 (single digit) value to be expanded into
+    replace_word(p->value, "denom:", "         ");
 
     // begin int to decimal formatting
     char *comma;
