@@ -22,4 +22,4 @@
  * 
  *  Returns 1 if successful.
  */
-int fixed8_str_conv(char *output, char *input);
+int fixed8_str_conv(char *output, char *input, char terminator);
