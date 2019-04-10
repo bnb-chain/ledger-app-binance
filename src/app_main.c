@@ -239,9 +239,6 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
             }
             
             // must be the last bip32 the user "saw" for signing to work.
-            if (bip32_depth != viewed_bip32_depth) {
-                THROW(APDU_CODE_DATA_INVALID);
-            }
             if (memcmp(bip32_path, viewed_bip32_path, sizeof(viewed_bip32_path)) != 0) {
                 THROW(APDU_CODE_DATA_INVALID);
             }
@@ -457,7 +454,6 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     *tx += 65;
 
                     // must be the last bip32 the user "saw" for signing to work.
-                    viewed_bip32_depth = bip32_depth;
                     memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
 
                     THROW(APDU_CODE_OK);
@@ -483,7 +479,6 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     view_addr_show(bip32_path[4] & 0x7FFFFFF);
 
                     // must be the last bip32 the user "saw" for signing to work.
-                    viewed_bip32_depth = bip32_depth;
                     memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
 
                     *flags |= IO_ASYNCH_REPLY;
@@ -509,7 +504,6 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     view_addr_confirm(bip32_path[4] & 0x7FFFFFF);
 
                     // must be the last bip32 the user "saw" for signing to work.
-                    viewed_bip32_depth = bip32_depth;
                     memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
 
                     *flags |= IO_ASYNCH_REPLY;
