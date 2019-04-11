@@ -40,6 +40,7 @@ int viewctl_DetailsCurrentPage;
 int viewctl_DetailsPageCount;
 int viewctl_ChunksIndex;
 int viewctl_ChunksCount;
+bool viewctl_SinglePage;
 
 viewctl_delegate_getData viewctl_ehGetData = NULL;
 viewctl_delegate_ready viewctl_ehReady = NULL;
@@ -49,6 +50,7 @@ viewctl_delegate_display_ux viewctl_display_ux = NULL;
 //------ External functions
 
 void viewctl_start(int start_page,
+                   bool single_page,
                    viewctl_delegate_getData func_getData,
                    viewctl_delegate_ready ehReady,
                    viewctl_delegate_exit ehExit,
@@ -64,6 +66,8 @@ void viewctl_start(int start_page,
 
     viewctl_ChunksIndex = 0;
     viewctl_ChunksCount = 1;
+
+    viewctl_SinglePage = single_page;
 
     viewctl_display_page();
 
@@ -106,7 +110,8 @@ void menu_left() {
     viewctl_scrolling_mode = PENDING;
     viewctl_ChunksIndex = 0;
     viewctl_ChunksCount = 1;
-    if (viewctl_DetailsCurrentPage > 0) {
+    if (!viewctl_SinglePage &&
+            viewctl_DetailsCurrentPage > 0) {
         viewctl_DetailsCurrentPage--;
         viewctl_display_page();
     } else {
@@ -118,7 +123,8 @@ void menu_right() {
     viewctl_scrolling_mode = PENDING;
     viewctl_ChunksIndex = 0;
     viewctl_ChunksCount = 1;
-    if (viewctl_DetailsCurrentPage < viewctl_DetailsPageCount - 1) {
+    if (!viewctl_SinglePage &&
+            viewctl_DetailsCurrentPage < viewctl_DetailsPageCount - 1) {
         viewctl_DetailsCurrentPage++;
         viewctl_display_page();
     } else {

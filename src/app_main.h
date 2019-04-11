@@ -41,7 +41,7 @@
 #define INS_SIGN_SECP256K1_TEST         102
 #endif
 
-#define MAX_BECH32_HRP_LEN              83
+#define MAX_BECH32_HRP_LEN              5
 
 void app_init();
 
@@ -50,6 +50,14 @@ void app_main();
 void set_hrp(char *hrp);
 
 int addr_getData(char *title, int max_title_length,
+                 char *key, int max_key_length,
+                 char *value, int max_value_length,
+                 int page_index,
+                 int chunk_index,
+                 int *page_count_out,
+                 int *chunk_count_out);
+
+int addr_getData_onePage(char *title, int max_title_length,
                  char *key, int max_key_length,
                  char *value, int max_value_length,
                  int page_index,

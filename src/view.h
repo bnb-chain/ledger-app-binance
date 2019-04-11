@@ -16,6 +16,7 @@
 ********************************************************************************/
 #pragma once
 
+#include <stdbool.h>
 #include "os.h"
 #include "cx.h"
 #include "view_common.h"

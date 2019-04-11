@@ -106,6 +106,7 @@ void view_address_show_main_net(unsigned int unused) {
     set_hrp("bnb");
     view_set_handlers(addr_getData, NULL, NULL);
     viewexpl_start(0,
+                   false,
                    ehGetData,   // update
                    NULL,        // ready
                    user_view_addr_exit // exit
@@ -118,6 +119,7 @@ void view_address_show_test_net(unsigned int unused) {
     set_hrp("tbnb");
     view_set_handlers(addr_getData, NULL, NULL);
     viewexpl_start(0,
+                   false,
                    ehGetData,   // update
                    NULL,        // ready
                    user_view_addr_exit // exit
@@ -130,6 +132,7 @@ void view_tx_show(unsigned int start_page) {
     if (ehGetData == NULL) { return; }
 
     viewexpl_start(start_page,
+                   false,         // multi-page
                    ehGetData,
                    NULL,
                    view_display_tx_menu);
@@ -144,14 +147,16 @@ void view_addr_exit(unsigned int unused) {
 
 void view_addr_show(unsigned int start_page) {
     viewexpl_start(start_page,
-                   ehGetData,   // update
-                   NULL,           // ready
+                   true,          // single page
+                   ehGetData,     // update
+                   NULL,          // ready
                    view_addr_exit // exit
     );
 }
 
 void view_addr_confirm(unsigned int start_page) {
     viewconf_start(start_page,
+                   true,        // single page
                    ehGetData,   // update
                    NULL,        // ready
                    NULL,        // exit

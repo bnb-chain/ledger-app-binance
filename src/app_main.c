@@ -381,6 +381,19 @@ int addr_getData(char *title, int max_title_length,
     return 0;
 }
 
+int addr_getData_onePage(char *title, int max_title_length,
+                 char *key, int max_key_length,
+                 char *value, int max_value_length,
+                 int page_index,
+                 int chunk_index,
+                 int *page_count_out,
+                 int *chunk_count_out) {
+    int ret = addr_getData(title, max_title_length, key, max_key_length, value, max_value_length, page_index, chunk_index, page_count_out, chunk_count_out);
+    *page_count_out = 1;
+    *chunk_count_out = 1;
+    return ret;
+}
+
 void addr_accept() {
     int pos = 0;
     // Send pubkey
@@ -475,7 +488,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
 
-                    view_set_handlers(addr_getData, NULL, NULL);
+                    view_set_handlers(addr_getData_onePage, NULL, NULL);
                     view_addr_show(bip32_path[4] & 0x7FFFFFF);
 
                     // must be the last bip32 the user "saw" for signing to work.
