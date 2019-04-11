@@ -98,6 +98,7 @@ void viewconf_display_ux() {
 }
 
 void viewconf_start(int start_page,
+                    bool single_page,
                     viewctl_delegate_getData func_update,
                     viewctl_delegate_ready func_ready,
                     viewctl_delegate_exit func_exit,
@@ -105,5 +106,5 @@ void viewconf_start(int start_page,
                     viewctl_delegate_reject func_reject) {
     viewctl_ehAccept = func_accept;
     viewctl_ehReject = func_reject;
-    viewctl_start(start_page, func_update, func_ready, func_exit, viewconf_display_ux);
+    viewctl_start(start_page, single_page, func_update, func_ready, func_exit, viewconf_display_ux);
 }
