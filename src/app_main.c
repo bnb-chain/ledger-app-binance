@@ -168,7 +168,7 @@ bool validate_bnc_bip32(uint8_t depth, uint32_t path[5]) {  // path is 10 bytes 
     if (sizeof(expected) / 4 != depth) {
         return 0;
     }
-    for (unsigned int i = 0; i < depth; i++) {
+    for (uint8_t i = 0; i < depth; i++) {
         if (expected[i] == placeholder) continue;
         if (path[i] != expected[i]) return 0;
     }
