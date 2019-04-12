@@ -23,7 +23,7 @@
 
 #define MAX_RECURSION_DEPTH  3
 #define MAX_TREE_LEVEL       2
-#define NON_MSG_PAGES_COUNT  6
+#define NON_MSG_PAGES_COUNT  3
 
 //---------------------------------------------
 
@@ -383,16 +383,7 @@ int16_t transaction_get_display_key_value(char *key, int16_t max_key_length,
                 key_name = "account_number";
                 break;
             case 2:
-                key_name = "sequence";
-                break;
-            case 3:
                 key_name = "memo";
-                break;
-            case 4:
-                key_name = "source";
-                break;
-            case 5:
-                key_name = "data";
                 break;
             default:
                 key_name = "????";
