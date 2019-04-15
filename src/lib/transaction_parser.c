@@ -28,12 +28,12 @@
 //---------------------------------------------
 
 const char whitespaces[] = {
-        0x20, // space ' '
-        0x0c, // form_feed '\f'
-        0x0a, // line_feed, '\n'
-        0x0d, // carriage_return, '\r'
-        0x09, // horizontal_tab, '\t'
-        0x0b  // vertical_tab, '\v'
+    0x20, // space ' '
+    0x0c, // form_feed '\f'
+    0x0a, // line_feed, '\n'
+    0x0d, // carriage_return, '\r'
+    0x09, // horizontal_tab, '\t'
+    0x0b  // vertical_tab, '\v'
 };
 
 //---------------------------------------------
@@ -184,7 +184,7 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
 
         // "prettify" some values when displayed
         // if/when the value is modified for prettification this flag will be flipped
-        bool modified = true;
+        bool val_modified = true;
 
         // reformat JSMN_OBJECT, JSMN_ARRAY
         // e.g. [{"amount":10000000000,"denom":"BNB"}]
@@ -227,13 +227,45 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
             if (slash && strcmp(slash, "/amount") == 0) {
                 fixed8_str_conv(p->value, p->value, '\0');
             } else {
-                modified = false;
+                val_modified = false;
             }
         }
-
-        if (modified) {
+        if (val_modified) {
             p->value_length = strlen(p->value);
         }
+
+        // replace some exceptionally ugly keys
+        if (strcmp(p->key, "id") == 0) {
+            strcpy(p->key, "ID");
+        }
+        else if (strcmp(p->key, "refid") == 0) {
+            strcpy(p->key, "Order ID");
+        }
+        else if (strcmp(p->key, "ordertype") == 0) {
+            strcpy(p->key, "Order Type");
+        }
+        else if (strcmp(p->key, "timeinforce") == 0) {
+            strcpy(p->key, "Time in Force");
+        }
+        else if (strcmp(p->key, "inputs/address") == 0) {
+            strcpy(p->key, "From Address");
+        }
+        else if (strcmp(p->key, "inputs/coins") == 0) {
+            strcpy(p->key, "Input Coins");
+        }
+        else if (strcmp(p->key, "outputs/address") == 0) {
+            strcpy(p->key, "To Address");
+        }
+        else if (strcmp(p->key, "outputs/coins") == 0) {
+            strcpy(p->key, "Output Coins");
+        }
+
+        // uppercase first char of `key`
+        else if (p->key[0] >= 'a' && p->key[0] <= 'z') {
+            p->key[0] = p->key[0] - 32;
+        }
+        replace_chrs(p->key, "_", " ");
+
         return ret;
     }
 
@@ -375,24 +407,34 @@ int16_t transaction_get_display_key_value(char *key, int16_t max_key_length,
     const int16_t non_msg_pages_count = NON_MSG_PAGES_COUNT;
     if (page_index >= 0 && page_index < non_msg_pages_count) {
         const char *key_name;
+        const char *key_subt;
         switch (page_index) {
             case 0:
                 key_name = "chain_id";
+                key_subt = "Chain ID";
                 break;
             case 1:
                 key_name = "memo";
+                key_subt = "Memo";
                 break;
             default:
                 key_name = "????";
+                key_subt = "????";
         }
-
-        strcpy(key, key_name);
+        strcpy(key, key_subt);
+        
         int16_t token_index = object_get_value(ROOT_TOKEN_INDEX,
                                                key_name,
                                                parsing_context.parsed_tx,
                                                parsing_context.tx);
 
-        return update(value, max_value_length, token_index, chunk_index);
+        uint16_t ret = update(value, max_value_length, token_index, chunk_index);
+
+        // empty values only really ever show up here; msgs are filled
+        if (strlen(value) == 0) {
+            strcpy(value, "(none)");
+        }
+        return ret;
     }
 
     int16_t msgs_page_to_display = page_index - non_msg_pages_count;
