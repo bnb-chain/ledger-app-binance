@@ -23,7 +23,7 @@
 
 #define MAX_RECURSION_DEPTH  3
 #define MAX_TREE_LEVEL       2
-#define NON_MSG_PAGES_COUNT  3
+#define NON_MSG_PAGES_COUNT  2
 
 //---------------------------------------------
 
@@ -380,9 +380,6 @@ int16_t transaction_get_display_key_value(char *key, int16_t max_key_length,
                 key_name = "chain_id";
                 break;
             case 1:
-                key_name = "account_number";
-                break;
-            case 2:
                 key_name = "memo";
                 break;
             default:
@@ -428,11 +425,9 @@ int16_t transaction_get_display_key_value(char *key, int16_t max_key_length,
             subpage_to_display -= count;
         }
 
-        snprintf(key, max_key_length, "msgs_%d/", msgs_array_index + 1);
-        int16_t prefix_len = strlen(key);
         return display_arbitrary_item(subpage_to_display,
-                                      key + prefix_len,
-                                      max_key_length - prefix_len,
+                                      key,
+                                      max_key_length,
                                       value,
                                       max_value_length,
                                       msgs_token_index,
