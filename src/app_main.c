@@ -154,13 +154,13 @@ bool extract_bip32(uint8_t *depth, uint32_t path[5], uint32_t rx, uint32_t offse
 bool validate_bnc_bip32(uint8_t depth, uint32_t path[5]) {  // path is 10 bytes for compatibility
     // Only paths in the form 44'/714'/{account}'/0/{index} are supported
     // placeholder for a user-specified value is 0xFFFFFFFF
-    uint32_t placeholder = 0xFFFFFFFF;
+    uint8_t mutable_nodes[] = {2, 4}; // account, index
     uint32_t expected[] = {
          44 | 0x80000000,  // purpose
         714 | 0x80000000,  // coin type (chain ID)
-          0 | 0x80000000,  // account
+          0 | 0x80000000,  // MUTABLE - account
           0,               // change (no change addresses for now)
-          placeholder,     // address index
+          0,               // MUTABLE - address index
     };
     if (depth != 5) {
         return 0;
@@ -168,8 +168,16 @@ bool validate_bnc_bip32(uint8_t depth, uint32_t path[5]) {  // path is 10 bytes 
     if (sizeof(expected) / 4 != depth) {
         return 0;
     }
+    bool mutable;
+    uint8_t j;
     for (uint8_t i = 0; i < depth; i++) {
-        if (expected[i] == placeholder) continue;
+        mutable = false;
+        for (j = 0; j < sizeof(mutable_nodes); j++) {
+            if (i != mutable_nodes[j]) continue;
+            mutable = true;
+            break;
+        }
+        if (mutable) continue;
         if (path[i] != expected[i]) return 0;
     }
     return 1;
