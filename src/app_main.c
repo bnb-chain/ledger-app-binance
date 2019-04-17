@@ -467,7 +467,8 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     *tx += 65;
 
                     // must be the last bip32 the user "saw" for signing to work.
-                    memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
+                    // NOTE: REMOVED FOR SECURITY - this does not show the address to user.
+                    // memcpy(viewed_bip32_path, bip32_path, sizeof(viewed_bip32_path));
 
                     THROW(APDU_CODE_OK);
                     break;
