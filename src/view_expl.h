@@ -1,5 +1,6 @@
 /*******************************************************************************
-*   (c) 2019 Binance
+*   (c) 2016 Ledger
+*   (c) 2018, 2019 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -13,13 +14,17 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
+#pragma once
 
-/** Encode a fixed8 without a decimal to one with a decimal point.
- * 
- *  Out: output:  Pointer to a buffer of size strlen(input) + 1.
- * 
- *  In:  input:   Pointer to the null-teriminated input string.
- * 
- *  Returns 1 if successful.
- */
-int fixed8_str_conv(char *output, char *input, char terminator);
+#include "os.h"
+#include "cx.h"
+#include "view_common.h"
+
+// Initialize and show control
+void viewexpl_start(
+        int start_page,
+        bool single_page,
+        viewctl_delegate_getData delegate_update,
+        viewctl_delegate_ready delegate_ready,
+        viewctl_delegate_exit delegate_exit
+        );

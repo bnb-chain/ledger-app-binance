@@ -1,5 +1,5 @@
 /*******************************************************************************
-*   (c) 2019 Binance
+*   (c) 2019 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -13,15 +13,24 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-#pragma once
+#include <gmock/gmock.h>
+#include <zxmacros.h>
+#include <bech32.h>
 
-#include <os.h>
+namespace {
+    TEST(BECH32, hex_to_address) {
+        char addr_out[100];
+        const char *hrp = "zx";
 
-#define SECP256K1_TAG_PUBKEY_EVEN 0x02
-#define SECP256K1_TAG_PUBKEY_ODD 0x03
-#define SECP256K1_TAG_PUBKEY_UNCOMPRESSED 0x04
+        uint8_t data1[] = {1, 3, 5};
+        uint8_t data2[] = {1, 3, 5, 7, 9, 11, 13};
 
-#define PK_COMPRESSED_LEN   33
-#define PK_UNCOMPRESSED_LEN 65
+        bech32EncodeFromBytes(addr_out, hrp, data1, sizeof(data1));
+        std::cout << addr_out << std::endl;
+        ASSERT_STREQ("zx1qypse825ac", addr_out);
 
-int secp256k1_pubkey_serialize(uint8_t *pub, size_t *size, int compress);
+        bech32EncodeFromBytes(addr_out, hrp, data2, sizeof(data2));
+        std::cout << addr_out << std::endl;
+        ASSERT_STREQ("zx1qyps2pcfpvx20dk22", addr_out);
+    }
+}

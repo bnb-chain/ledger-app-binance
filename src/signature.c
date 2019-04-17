@@ -65,4 +65,3 @@ int sign_secp256k1(const uint8_t *message,
     return 1;
 #endif
 }
-

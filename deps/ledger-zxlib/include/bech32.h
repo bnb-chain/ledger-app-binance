@@ -1,5 +1,5 @@
 /*******************************************************************************
-*   (c) 2019 Binance
+*   (c) 2019 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -13,13 +13,20 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
+#pragma once
 
-/** Encode a fixed8 without a decimal to one with a decimal point.
- * 
- *  Out: output:  Pointer to a buffer of size strlen(input) + 1.
- * 
- *  In:  input:   Pointer to the null-teriminated input string.
- * 
- *  Returns 1 if successful.
- */
-int fixed8_str_conv(char *output, char *input, char terminator);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// the following function encodes directly from bytes
+// it will internally convert from 8 to 5 bits and return a
+// zero-terminated string in output
+void bech32EncodeFromBytes(char *output,
+                           const char *hrp,
+                           const uint8_t *data,
+                           size_t data_len);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,7 +1,7 @@
 /*******************************************************************************
-*   (c) 2019 Binance
 *   (c) 2016 Ledger
 *   (c) 2018 ZondaX GmbH
+*   (c) 2019 Binance
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@
 #define OFFSET_DATA                     5  //< Data offset
 
 #define INS_GET_VERSION                 0
-#define INS_PUBLIC_KEY_SECP256K1        1
+#define INS_PUBLIC_KEY_SECP256K1        1  // It will be deprecated in the near future
 #define INS_SIGN_SECP256K1              2
+#define INS_SHOW_ADDR_SECP256K1         3
+#define INS_GET_ADDR_SECP256K1          4
 
 #ifdef TESTING_ENABLED
 #define INS_HASH_TEST                   100
@@ -39,5 +41,26 @@
 #define INS_SIGN_SECP256K1_TEST         102
 #endif
 
+#define MAX_BECH32_HRP_LEN              5
+
 void app_init();
+
 void app_main();
+
+void set_hrp(char *hrp);
+
+int addr_getData(char *title, int max_title_length,
+                 char *key, int max_key_length,
+                 char *value, int max_value_length,
+                 int page_index,
+                 int chunk_index,
+                 int *page_count_out,
+                 int *chunk_count_out);
+
+int addr_getData_onePage(char *title, int max_title_length,
+                 char *key, int max_key_length,
+                 char *value, int max_value_length,
+                 int page_index,
+                 int chunk_index,
+                 int *page_count_out,
+                 int *chunk_count_out);

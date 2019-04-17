@@ -1,5 +1,6 @@
 /*******************************************************************************
 *   (c) 2018 ZondaX GmbH
+*   (c) 2019 Binance
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,7 +17,7 @@
 #pragma once
 
 typedef enum {
-    SECP256K1 = 0,
+    SECP256K1 = 0
 } sigtype_t;
 
 extern sigtype_t current_sigtype;

@@ -21,7 +21,7 @@
 #include "buffering.h"
 
 // Ram
-#define RAM_BUFFER_SIZE 448
+#define RAM_BUFFER_SIZE 424
 uint8_t ram_buffer[RAM_BUFFER_SIZE];
 
 // Flash
@@ -83,16 +83,14 @@ const char* transaction_parse() {
     if (error_msg != NULL) {
         return error_msg;
     }
+
     parsing_context_t context;
-    context.transaction = transaction_buffer;
+    context.tx = transaction_buffer;
     context.max_chars_per_key_line = MAX_CHARS_PER_KEY_LINE;
     context.max_chars_per_value_line = MAX_CHARS_PER_VALUE_LINE;
-    context.parsed_transaction = &parsed_transaction;
+    context.parsed_tx = &parsed_transaction;
+
     set_parsing_context(context);
     set_copy_delegate(&os_memmove);
     return NULL;
-}
-
-parsed_json_t *transaction_get_parsed() {
-    return &parsed_transaction;
 }

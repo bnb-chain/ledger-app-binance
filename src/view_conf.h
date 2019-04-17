@@ -1,5 +1,6 @@
 /*******************************************************************************
-*   (c) 2019 Binance
+*   (c) 2016 Ledger
+*   (c) 2018, 2019 ZondaX GmbH
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -13,15 +14,17 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-#include "pubkey.h"
+#pragma once
 
-int secp256k1_pubkey_serialize(uint8_t *pubkey, size_t *size, int compress) {
-    if (compress) {
-        *size = PK_COMPRESSED_LEN;
-        pubkey[0] = pubkey[64] & 1 ? SECP256K1_TAG_PUBKEY_ODD : SECP256K1_TAG_PUBKEY_EVEN;
-    } else {
-        *size = PK_UNCOMPRESSED_LEN;
-        pubkey[0] = SECP256K1_TAG_PUBKEY_UNCOMPRESSED;
-    }
-    return 1;
-}
+#include "os.h"
+#include "cx.h"
+#include "view_common.h"
+
+// Initialize and show control
+void viewconf_start(int start_page,
+                    bool single_page,
+                    viewctl_delegate_getData func_update,
+                    viewctl_delegate_ready func_ready,
+                    viewctl_delegate_exit func_exit,
+                    viewctl_delegate_accept func_accept,
+                    viewctl_delegate_reject func_reject);
