@@ -236,28 +236,28 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
 
         // replace some exceptionally ugly keys
         if (strcmp(p->key, "id") == 0) {
-            strcpy(p->key, "ID");
-        }
-        else if (strcmp(p->key, "refid") == 0) {
-            strcpy(p->key, "Order ID");
+            strcpy(p->key, "Create Order ID");
         }
         else if (strcmp(p->key, "ordertype") == 0) {
-            strcpy(p->key, "Order Type");
+            strcpy(p->key, "Create Order Type");
         }
         else if (strcmp(p->key, "timeinforce") == 0) {
             strcpy(p->key, "Time in Force");
         }
+        else if (strcmp(p->key, "refid") == 0) {
+            strcpy(p->key, "Cancel Order ID");
+        }
         else if (strcmp(p->key, "inputs/address") == 0) {
-            strcpy(p->key, "From Address");
+            strcpy(p->key, "Send From Address");
         }
         else if (strcmp(p->key, "inputs/coins") == 0) {
-            strcpy(p->key, "Input Coins");
+            strcpy(p->key, "Send Input Coins");
         }
         else if (strcmp(p->key, "outputs/address") == 0) {
-            strcpy(p->key, "To Address");
+            strcpy(p->key, "Send To Address");
         }
         else if (strcmp(p->key, "outputs/coins") == 0) {
-            strcpy(p->key, "Output Coins");
+            strcpy(p->key, "Send Output Coins");
         }
 
         // uppercase first char of `key`
