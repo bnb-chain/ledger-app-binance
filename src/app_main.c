@@ -234,14 +234,6 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
             if (!extract_bip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
                 THROW(APDU_CODE_DATA_INVALID);
             }
-            if (!validate_bnc_bip32(bip32_depth, bip32_path)) {
-                THROW(APDU_CODE_DATA_INVALID);
-            }
-            
-            // must be the last bip32 the user "saw" for signing to work.
-            if (memcmp(bip32_path, viewed_bip32_path, sizeof(viewed_bip32_path)) != 0) {
-                THROW(APDU_CODE_DATA_INVALID);
-            }
 
             return packageIndex == packageCount;
         }
