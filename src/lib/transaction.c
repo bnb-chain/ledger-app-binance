@@ -21,7 +21,7 @@
 #include "buffering.h"
 
 // Ram
-#define RAM_BUFFER_SIZE 424
+#define RAM_BUFFER_SIZE 500
 uint8_t ram_buffer[RAM_BUFFER_SIZE];
 
 // Flash
