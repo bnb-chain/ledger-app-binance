@@ -222,6 +222,9 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
                 strcpy(p->value, "Immediate or Cancel");
             }
         }
+        else if (strcmp(p->key, "description") == 0) {
+            replace_word(p->value, "\\\"", "\"");
+        }
         else {
             char *slash = strrchr(p->key, '/');
             if (slash && strcmp(slash, "/amount") == 0) {
