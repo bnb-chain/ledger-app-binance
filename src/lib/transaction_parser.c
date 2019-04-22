@@ -216,10 +216,10 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
         }
         else if (strcmp(p->key, "timeinforce") == 0) {
             if (strcmp(p->value, "1") == 0) {
-                strcpy(p->value, "GTE");
+                strcpy(p->value, "Good 'Til Expiry");
             }
             else if (strcmp(p->value, "3") == 0) {
-                strcpy(p->value, "IOC");
+                strcpy(p->value, "Immediate or Cancel");
             }
         }
         else {
