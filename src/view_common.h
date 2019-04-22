@@ -22,7 +22,7 @@
 
 #define MAX_CHARS_TITLE             32
 #define MAX_CHARS_PER_KEY_LINE      64
-#define MAX_CHARS_PER_VALUE_LINE    192
+#define MAX_CHARS_PER_VALUE_LINE    130
 #define MAX_SCREEN_LINE_WIDTH       22
 
 extern volatile char viewctl_DataKey[MAX_CHARS_PER_KEY_LINE];

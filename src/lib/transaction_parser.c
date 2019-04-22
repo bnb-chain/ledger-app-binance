@@ -82,7 +82,7 @@ void strcat_s(char *dst, uint16_t dst_max, const char *src, uint16_t src_size) {
     *(p + src_size) = 0;
 }
 
-char *replace_word(char* str, char* word, char* subst) {
+char *replace_word(char *str, char *word, char *subst) {
     int len  = strlen(str);
     int lena = strlen(word), lenb = strlen(subst);
     for (char* p = str; (p = strstr(p, word)); ++p) {
@@ -200,18 +200,18 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
         }
         else if (strcmp(p->key, "ordertype") == 0) {
             if (strcmp(p->value, "1") == 0) {
-                strcpy(p->value, "MARKET");
+                strcpy(p->value, "Market order");
             }
             else if (strcmp(p->value, "2") == 0) {
-                strcpy(p->value, "LIMIT");
+                strcpy(p->value, "Limit order");
             }
         }
         else if (strcmp(p->key, "side") == 0) {
             if (strcmp(p->value, "1") == 0) {
-                strcpy(p->value, "BUY");
+                strcpy(p->value, "Buy");
             }
             else if (strcmp(p->value, "2") == 0) {
-                strcpy(p->value, "SELL");
+                strcpy(p->value, "Sell");
             }
         }
         else if (strcmp(p->key, "timeinforce") == 0) {
@@ -236,28 +236,31 @@ int16_t retrieve_value(display_context_params_t *p, int16_t token_index, jsmntyp
 
         // replace some exceptionally ugly keys
         if (strcmp(p->key, "id") == 0) {
-            strcpy(p->key, "Create Order ID");
+            strcpy(p->key, "Create order ID");
         }
         else if (strcmp(p->key, "ordertype") == 0) {
-            strcpy(p->key, "Create Order Type");
+            strcpy(p->key, "Create order type");
         }
         else if (strcmp(p->key, "timeinforce") == 0) {
-            strcpy(p->key, "Time in Force");
+            strcpy(p->key, "Time in force");
         }
         else if (strcmp(p->key, "refid") == 0) {
-            strcpy(p->key, "Cancel Order ID");
+            strcpy(p->key, "Cancel order ID");
         }
         else if (strcmp(p->key, "inputs/address") == 0) {
-            strcpy(p->key, "Send From Address");
+            strcpy(p->key, "Send from address");
         }
         else if (strcmp(p->key, "inputs/coins") == 0) {
-            strcpy(p->key, "Send Input Coins");
+            strcpy(p->key, "Send input coins");
         }
         else if (strcmp(p->key, "outputs/address") == 0) {
-            strcpy(p->key, "Send To Address");
+            strcpy(p->key, "Send to address");
         }
         else if (strcmp(p->key, "outputs/coins") == 0) {
-            strcpy(p->key, "Send Output Coins");
+            strcpy(p->key, "Send output coins");
+        }
+        else if (strcmp(p->key, "voting_period") == 0) {
+            strcpy(p->key, "Voting period (in nanoseconds)");
         }
 
         // uppercase first char of `key`
