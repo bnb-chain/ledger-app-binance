@@ -31,7 +31,7 @@ typedef struct {
 } storage_t;
 
 storage_t N_appdata_impl __attribute__ ((aligned(64)));
-#define N_appdata (*(storage_t *)PIC(&N_appdata_impl))
+#define N_appdata (*(volatile storage_t *)PIC(&N_appdata_impl))
 
 parsed_json_t parsed_transaction;
 

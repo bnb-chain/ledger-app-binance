@@ -31,9 +31,9 @@ include $(BOLOS_SDK)/Makefile.defines
 APPNAME="Binance Chain"
 APPVERSION_M=1
 APPVERSION_N=1
-APPVERSION_P=3
+APPVERSION_P=4
 
-APP_LOAD_PARAMS = --appFlags 0x00 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
+APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
 ICONNAME=$(CURDIR)/icon.gif
 
 ############
@@ -63,6 +63,18 @@ DEFINES   += U2F_MAX_MESSAGE_SIZE=264 #257+5+2
 
 DEFINES   += HAVE_BOLOS_APP_STACK_CANARY
 DEFINES   += LEDGER_SPECIFIC
+
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
+DEFINES       += HAVE_BLE_APDU # basic ledger apdu transport over BLE
+
+DEFINES       += HAVE_GLO096 HAVE_UX_LEGACY
+DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+endif
 
 #Feature temporarily disabled
 #DEFINES += TESTING_ENABLED
@@ -102,6 +114,12 @@ LDLIBS   += -lm -lgcc -lc
 
 APP_SOURCE_PATH += src deps/jsmn/src deps/ledger-zxlib/include deps/ledger-zxlib/src
 SDK_SOURCE_PATH += lib_stusb lib_u2f lib_stusb_impl
+
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+SDK_SOURCE_PATH  += lib_ux
+DEFINES          += HAVE_UX_FLOW
+endif
 
 all: default
 
