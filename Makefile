@@ -23,7 +23,9 @@ endif
 
 dummy_submodules := $(shell git submodule update --init --recursive)
 
+ifeq ($(TARGET_NAME),TARGET_NANOS)
 SCRIPT_LD:=$(CURDIR)/script.ld
+endif
 
 include $(BOLOS_SDK)/Makefile.defines
 
@@ -34,7 +36,11 @@ APPVERSION_N=1
 APPVERSION_P=4
 
 APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
+ifeq ($(TARGET_NAME),TARGET_NANOS)
 ICONNAME=$(CURDIR)/icon.gif
+else
+ICONNAME=$(CURDIR)/icon_nanox.gif
+endif
 
 ############
 # Platform
