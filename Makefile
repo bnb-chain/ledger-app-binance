@@ -35,10 +35,11 @@ APPVERSION_M=1
 APPVERSION_N=1
 APPVERSION_P=4
 
-APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
 ifeq ($(TARGET_NAME),TARGET_NANOS)
+APP_LOAD_PARAMS = --appFlags 0x00 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
 ICONNAME=$(CURDIR)/icon.gif
 else
+APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
 ICONNAME=$(CURDIR)/icon_nanox.gif
 endif
 
