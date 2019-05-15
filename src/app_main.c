@@ -23,11 +23,13 @@
 #include "zxmacros.h"
 #include "bech32.h"
 
-#include "os_io_seproxyhal.h"
+#include <os_io_seproxyhal.h>
 #include <os.h>
 
 #include <string.h>
+#ifdef TARGET_NANOX
 #include "glyphs.h"
+#endif
 
 #ifdef TESTING_ENABLED
 // Generate using always the same private data
@@ -53,9 +55,6 @@ sigtype_t current_sigtype;
 
 char bech32_hrp[MAX_BECH32_HRP_LEN + 1];
 uint8_t bech32_hrp_len;
-
-// A path contains 10 elements max, which max length in ascii is 1 whitespace + 10 char + optional quote "'" + "/" + \0"
-#define MAX_DERIV_PATH_ASCII_LENGTH 1 + 10*(10+2) + 1 
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
@@ -468,6 +467,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     G_io_apdu_buffer[1] = LEDGER_MAJOR_VERSION;
                     G_io_apdu_buffer[2] = LEDGER_MINOR_VERSION;
                     G_io_apdu_buffer[3] = LEDGER_PATCH_VERSION;
+                    G_io_apdu_buffer[4] = !UX_ALLOWED;
 
                     *tx += 5;
                     THROW(APDU_CODE_OK);
