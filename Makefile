@@ -30,7 +30,7 @@ endif
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
-APPNAME="Binance Chain2"
+APPNAME="Binance Chain"
 APPVERSION_M=1
 APPVERSION_N=1
 APPVERSION_P=4
