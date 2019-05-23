@@ -200,5 +200,7 @@ void viewctl_display_page() {
     asciify((char *) viewctl_DataKey);
     asciify((char *) viewctl_DataValue);
 
+#if defined(TARGET_NANOS)
     viewctl_display_ux(viewctl_DetailsCurrentPage, viewctl_DetailsPageCount);
+#endif
 }

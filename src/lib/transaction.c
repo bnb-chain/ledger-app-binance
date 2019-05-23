@@ -30,7 +30,7 @@ typedef struct {
     uint8_t buffer[FLASH_BUFFER_SIZE];
 } storage_t;
 
-storage_t N_appdata_impl __attribute__ ((aligned(64)));
+const storage_t N_appdata_impl __attribute__ ((aligned(64)));
 #define N_appdata (*(storage_t *)PIC(&N_appdata_impl))
 
 parsed_json_t parsed_transaction;
