@@ -24,7 +24,7 @@ endif
 dummy_submodules := $(shell git submodule update --init --recursive)
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-SCRIPT_LD:=$(CURDIR)/script.ld	SCRIPT_LD:=$(CURDIR)/script.ld
+SCRIPT_LD:=$(CURDIR)/script.ld
 endif
 
 include $(BOLOS_SDK)/Makefile.defines
@@ -85,7 +85,7 @@ DEFINES   += HAVE_BAGL_ELLIPSIS # long label truncation feature
 DEFINES   += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
 DEFINES   += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
 DEFINES   += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-DEFINES		  += HAVE_UX_FLOW
+DEFINES	  += HAVE_UX_FLOW
 else
 DEFINES   += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 endif
@@ -93,7 +93,6 @@ endif
 # Enabling debug PRINTF
 DEBUG = 0
 ifneq ($(DEBUG),0)
-
         ifeq ($(TARGET_NAME),TARGET_NANOX)
                 DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
         else
