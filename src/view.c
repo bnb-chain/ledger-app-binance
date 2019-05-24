@@ -34,16 +34,19 @@
 
 #ifdef TARGET_NANOX
 #include "ux.h"
-    ux_state_t G_ux;
-    bolos_ux_params_t G_ux_params;
+ux_state_t G_ux;
+bolos_ux_params_t G_ux_params;
 #else // TARGET_NANOX
-    ux_state_t ux;
-#endif // TARGET_NANOX
+ux_state_t ux;
+#endif
+
 enum UI_STATE view_uiState;
 
 void reject(unsigned int unused);
 
+
 //------ View elements
+#if defined(TARGET_NANOS)
 const ux_menu_entry_t menu_main[];
 const ux_menu_entry_t menu_address[];
 const ux_menu_entry_t menu_about[];
@@ -79,6 +82,82 @@ const ux_menu_entry_t menu_about[] = {
         {menu_main, NULL, 2, &C_icon_back, "Back", NULL, 61, 40},
         UX_MENU_END
 };
+#elif defined(TARGET_NANOX)
+//////////////////////////////////////////////////////////////////////
+UX_FLOW_DEF_VALID(
+    ux_menu_main_addr_step,
+    nnbnn,
+    view_address_show_main_net(0),
+    {
+      "", "",
+      "Mainnet address",
+      "", "",
+    });
+UX_FLOW_DEF_VALID(
+    ux_menu_test_addr_step,
+    nnbnn,
+    view_address_show_test_net(0),
+    {
+      "", "",
+      "Testnet address",
+      "", "",
+    });
+UX_FLOW_DEF_VALID(
+    ux_menu_addr_back_step,
+    pb,
+    view_idle(0),
+    {
+      &C_icon_back_x,
+      "Go back",
+    });
+
+UX_FLOW(menu_address_x,
+  &ux_menu_main_addr_step,
+  &ux_menu_test_addr_step,
+  &ux_menu_addr_back_step
+);
+
+//////////////////////////////////////////////////////////////////////
+UX_FLOW_DEF_NOCB(
+    ux_idle_flow_1_step,
+    pnn,
+    {
+      &C_binance,
+      "Binance Chain",
+      "ready",
+    });
+UX_FLOW_DEF_NOCB(
+    ux_idle_flow_2_step,
+    bn,
+    {
+      "Version",
+      APPVERSION,
+    });
+UX_FLOW_DEF_VALID(
+    ux_idle_flow_3_step,
+    pb,
+    ux_flow_init(0, menu_address_x, NULL),
+    {
+      &C_icon_eye,
+      "Your addresses",
+    });
+UX_FLOW_DEF_VALID(
+    ux_idle_flow_4_step,
+    pb,
+    os_sched_exit(-1),
+    {
+      &C_icon_dashboard_x,
+      "Quit",
+    });
+
+UX_FLOW(ux_idle_flow,
+  &ux_idle_flow_1_step,
+  &ux_idle_flow_2_step,
+  &ux_idle_flow_3_step,
+  &ux_idle_flow_4_step,
+  FLOW_LOOP
+);
+#endif
 //------ View elements
 
 //------ Event handlers
@@ -117,6 +196,10 @@ void view_address_show_main_net(unsigned int unused) {
                    NULL,        // ready
                    user_view_addr_exit // exit
     );
+
+#if defined(TARGET_NANOX)
+    ux_flow_init(0, ux_view_address_flow, NULL);
+#endif
 }
 
 void view_address_show_test_net(unsigned int unused) {
@@ -130,6 +213,10 @@ void view_address_show_test_net(unsigned int unused) {
                    NULL,        // ready
                    user_view_addr_exit // exit
     );
+
+#if defined(TARGET_NANOX)
+    ux_flow_init(0, ux_view_address_flow, NULL);
+#endif
 }
 
 /////////////////////////////////
@@ -142,6 +229,10 @@ void view_tx_show(unsigned int start_page) {
                    ehGetData,
                    NULL,
                    view_display_tx_menu);
+
+#if defined(TARGET_NANOX)
+    ux_flow_init(0, ux_confirm_full_flow, NULL);
+#endif
 }
 
 void view_addr_exit(unsigned int unused) {
@@ -158,6 +249,11 @@ void view_addr_show(unsigned int start_page) {
                    NULL,          // ready
                    view_addr_exit // exit
     );
+
+#if defined(TARGET_NANOX)
+    ux_flow_init(0, ux_show_address_flow, NULL);
+#endif
+
 }
 
 void view_addr_confirm(unsigned int start_page) {
@@ -168,6 +264,11 @@ void view_addr_confirm(unsigned int start_page) {
                    NULL,        // exit
                    ehAccept,
                    ehReject);
+
+#if defined(TARGET_NANOX)
+    ux_flow_init(0, ux_get_address_flow, NULL);
+#endif
+
 }
 
 /////////////////////////////////
@@ -192,12 +293,22 @@ void view_init(void) {
 
 void view_idle(unsigned int ignored) {
     view_uiState = UI_IDLE;
+#if defined(TARGET_NANOS)
     UX_MENU_DISPLAY(0, menu_main, NULL);
+#elif defined(TARGET_NANOX)
+    // reserve a display stack slot if none yet
+    if(G_ux.stack_count == 0) {
+        ux_stack_push();
+    }
+    ux_flow_init(0, ux_idle_flow, NULL);
+#endif
 }
 
 void view_display_tx_menu(unsigned int ignored) {
     view_uiState = UI_TRANSACTION;
+#if defined(TARGET_NANOS)
     UX_MENU_DISPLAY(0, menu_transaction_info, NULL);
+#endif
 }
 
 void view_display_signing_success() {
