@@ -24,7 +24,7 @@ endif
 dummy_submodules := $(shell git submodule update --init --recursive)
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-SCRIPT_LD:=$(CURDIR)/script.ld	SCRIPT_LD:=$(CURDIR)/script.ld
+SCRIPT_LD:=$(CURDIR)/script.ld
 endif
 
 include $(BOLOS_SDK)/Makefile.defines
