@@ -118,9 +118,20 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 
 void app_init() {
     io_seproxyhal_init();
+
+#ifdef TARGET_NANOX
+                // grab the current plane mode setting
+                G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
+#endif // TARGET_NANOX
+
     USB_power(0);
     USB_power(1);
     view_idle(0);
+
+#ifdef HAVE_BLE
+                BLE_power(0, NULL);
+                BLE_power(1, "Nano X");
+#endif // HAVE_BLE
 
     // set the default bip32 path
     bip32_depth = 5;
@@ -415,6 +426,11 @@ void addr_reject() {
     view_idle(0);
 }
 
+void show_addr_exit() {
+    set_code(G_io_apdu_buffer, 0, APDU_CODE_OK);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+    view_idle(0);
+}
 //endregion
 
 void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
@@ -434,7 +450,11 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
             switch (G_io_apdu_buffer[OFFSET_INS]) {
                 case INS_GET_VERSION: {
+#ifdef TARGET_NANOX
+                    unsigned int UX_ALLOWED = (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE);
+#else
                     unsigned int UX_ALLOWED = (ux.params.len != BOLOS_UX_IGNORE && ux.params.len != BOLOS_UX_CONTINUE);
+#endif
 
 #ifdef TESTING_ENABLED
                     G_io_apdu_buffer[0] = 0xFF;
@@ -649,6 +669,8 @@ void app_main() {
 
                 if (rx == 0)
                     THROW(APDU_CODE_EMPTY_BUFFER);
+
+                PRINTF("New APDU received:\n%.*H\n", rx, G_io_apdu_buffer);
 
                 handleApdu(&flags, &tx, rx);
             }

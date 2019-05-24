@@ -28,8 +28,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#if defined(TARGET_NANOS)
 // -----
-
 static const bagl_element_t viewexpl_bagl_valuescrolling_first[] = {
         UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
         UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
@@ -99,8 +99,267 @@ static const bagl_element_t viewexpl_bagl_keyscrolling_only[] = {
         UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataValue),
         UI_LabelLineScrolling(2, 16, 19, 96, 11, 0xFFFFFF, 0x000000, (const char *) viewctl_DataKey),
 };
-
 // -----
+#elif defined(TARGET_NANOX)
+
+void display_next_state(bool is_upper_border);
+
+UX_STEP_NOCB(ux_review_step, 
+    pnn, 
+    {
+      &C_icon_eye,
+      "Review",
+      "transaction",
+    });
+UX_STEP_INIT(
+    ux_init_upper_border,
+    NULL,
+    NULL,
+    {
+        display_next_state(true);
+    });
+UX_STEP_NOCB(
+    ux_variable_display, 
+    nnn,
+    {
+      viewctl_Title,
+      viewctl_DataKey,
+      viewctl_DataValue,
+    });
+UX_STEP_INIT(
+    ux_init_lower_border,
+    NULL,
+    NULL,
+    {
+        display_next_state(false);
+    });
+UX_STEP_VALID(
+    ux_sign_step, 
+    pbb, 
+    tx_accept_sign(),
+    {
+      &C_icon_validate_14,
+      "Sign",
+      "transaction",
+    });
+UX_STEP_VALID(
+    ux_reject_step, 
+    pb, 
+    tx_reject(),
+    {
+      &C_icon_crossmark,
+      "Reject",
+    });
+// confirm_full: confirm transaction / Amount: fullAmount / Address: fullAddress / Fees: feesAmount
+UX_FLOW(ux_confirm_full_flow,
+  &ux_review_step,
+  &ux_init_upper_border,
+  &ux_variable_display,
+  &ux_init_lower_border,
+  &ux_sign_step,
+  &ux_reject_step
+);    
+
+volatile uint8_t current_state;
+
+#define INSIDE_BORDERS 0
+#define OUT_OF_BORDERS 1
+
+
+void display_next_state(bool is_upper_border){
+
+    if(is_upper_border){ // walking over the first border
+        if(current_state == OUT_OF_BORDERS){
+            current_state = INSIDE_BORDERS;
+            ux_flow_next();
+        }
+        else{
+            if(viewctl_DetailsCurrentPage > 0){
+                viewctl_DetailsCurrentPage--;
+                viewctl_display_page();
+                ux_flow_next();
+            }
+            else{
+                current_state = OUT_OF_BORDERS;
+                ux_flow_prev();
+            }
+        }
+    }
+    else // walking over the second border
+    {
+        if(current_state == OUT_OF_BORDERS){
+            current_state = INSIDE_BORDERS;
+            viewctl_display_page();
+            ux_flow_prev();
+        }
+        else{
+            if(viewctl_DetailsCurrentPage < viewctl_DetailsPageCount - 1){
+                viewctl_DetailsCurrentPage++;
+                viewctl_display_page();
+                ux_flow_prev();
+            }
+            else{
+                current_state = OUT_OF_BORDERS;
+                ux_flow_next();
+            }
+        }
+    }
+    
+}
+
+//////////////////////////////////////////////////////////////////////
+void view_addr_next_state(bool is_upper_border);
+
+UX_STEP_NOCB(ux_view_addr_init_step, 
+    pn, 
+    {
+      &C_icon_eye,
+      "Address list",
+    });
+UX_STEP_INIT(
+    ux_view_addr_upper_border,
+    NULL,
+    NULL,
+    {
+        view_addr_next_state(true);
+    });
+UX_STEP_VALID(
+    ux_view_addr_step, 
+    nnn,
+    view_idle(0),
+    {
+      viewctl_Title,
+      viewctl_DataKey,
+      viewctl_DataValue,
+    });
+UX_STEP_INIT(
+    ux_view_addr_lower_border,
+    NULL,
+    NULL,
+    {
+        view_addr_next_state(false);
+    });
+
+UX_FLOW(ux_view_address_flow,
+  &ux_view_addr_init_step,
+  &ux_view_addr_upper_border,
+  &ux_view_addr_step,
+  &ux_view_addr_lower_border
+);
+
+void view_addr_next_state(bool is_upper_border){
+
+    if(is_upper_border){ // walking over the first border
+        if(current_state == OUT_OF_BORDERS){
+            current_state = INSIDE_BORDERS;
+            ux_flow_next();
+        }
+        else{
+            if(viewctl_DetailsCurrentPage > 0){
+                viewctl_DetailsCurrentPage--;
+                viewctl_display_page();
+                ux_flow_next();
+            }
+            else{
+                current_state = OUT_OF_BORDERS;
+                ux_flow_prev();
+            }
+        }
+    }
+    else // walking over the second border
+    {
+        if(current_state == OUT_OF_BORDERS){
+            current_state = INSIDE_BORDERS;
+            viewctl_display_page();
+            ux_flow_prev();
+        }
+        else{
+            if(viewctl_DetailsCurrentPage < viewctl_DetailsPageCount - 1){
+                viewctl_DetailsCurrentPage++;
+                viewctl_display_page();
+                ux_flow_prev();
+            }
+            else{
+                current_state = OUT_OF_BORDERS;
+                ux_flow_next();
+            }
+        }
+    }
+    
+}
+
+//////////////////////////////////////////////////////////////////////
+
+UX_STEP_NOCB(
+    ux_show_addr_step, 
+    nnn,
+    {
+      viewctl_Title,
+      viewctl_DataKey,
+      viewctl_DataValue,
+    });
+UX_STEP_VALID(
+    ux_show_addr_approve_step, 
+    pb, 
+    show_addr_exit(),
+    {
+      &C_icon_validate_14,
+      "Approve",
+    });
+UX_STEP_VALID(
+    ux_show_addr_reject_step, 
+    pb, 
+    show_addr_exit(),
+    {
+      &C_icon_crossmark,
+      "Reject",
+    });
+
+
+UX_FLOW(ux_show_address_flow,
+  &ux_show_addr_step,
+  &ux_show_addr_approve_step,
+  &ux_show_addr_reject_step
+);
+
+//////////////////////////////////////////////////////////////////////
+
+UX_STEP_NOCB(
+    ux_get_addr_step, 
+    nnn,
+    {
+      viewctl_Title,
+      viewctl_DataKey,
+      viewctl_DataValue,
+    });
+UX_STEP_VALID(
+    ux_get_addr_approve_step, 
+    pb, 
+    addr_accept(),
+    {
+      &C_icon_validate_14,
+      "Approve",
+    });
+UX_STEP_VALID(
+    ux_get_addr_reject_step, 
+    pb, 
+    addr_reject(),
+    {
+      &C_icon_crossmark,
+      "Reject",
+    });
+
+
+UX_FLOW(ux_get_address_flow,
+  &ux_get_addr_step,
+  &ux_get_addr_approve_step,
+  &ux_get_addr_reject_step
+);
+
+
+#endif
+
+
 
 const bagl_element_t *viewexpl_bagl_prepro(const bagl_element_t *element) {
 
@@ -212,6 +471,7 @@ static unsigned int viewexpl_bagl_valuescrolling_only_button(
 }
 
 void viewexpl_display_ux(int page, int count) {
+#if defined(TARGET_NANOS)
     if (viewctl_scrolling_mode == VALUE_SCROLLING) {
         if (page == 0) {
             UX_DISPLAY(viewexpl_bagl_valuescrolling_first, viewexpl_bagl_prepro);
@@ -233,6 +493,12 @@ void viewexpl_display_ux(int page, int count) {
     } else {
         UX_DISPLAY(viewexpl_bagl_keyscrolling, viewexpl_bagl_prepro);
     }
+#elif defined(TARGET_NANOX)
+
+
+
+
+#endif
 }
 
 void viewexpl_start(int start_page,
@@ -242,4 +508,9 @@ void viewexpl_start(int start_page,
                     viewctl_delegate_exit ehExit) {
 
     viewctl_start(start_page, single_page, ehUpdate, ehReady, ehExit, viewexpl_display_ux);
+
+#if defined(TARGET_NANOX)
+    current_state = OUT_OF_BORDERS;
+#endif
+
 }
