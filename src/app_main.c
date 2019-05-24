@@ -27,9 +27,6 @@
 #include <os.h>
 
 #include <string.h>
-#ifdef TARGET_NANOX
-#include "glyphs.h"
-#endif
 
 #ifdef TESTING_ENABLED
 // Generate using always the same private data
@@ -437,11 +434,8 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
             switch (G_io_apdu_buffer[OFFSET_INS]) {
                 case INS_GET_VERSION: {
-#ifdef TARGET_NANOX
-                    unsigned int UX_ALLOWED = (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE);
-#else
                     unsigned int UX_ALLOWED = (ux.params.len != BOLOS_UX_IGNORE && ux.params.len != BOLOS_UX_CONTINUE);
-#endif
+
 #ifdef TESTING_ENABLED
                     G_io_apdu_buffer[0] = 0xFF;
 #else
