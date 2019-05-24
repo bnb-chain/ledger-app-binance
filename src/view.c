@@ -306,7 +306,9 @@ void view_idle(unsigned int ignored) {
 
 void view_display_tx_menu(unsigned int ignored) {
     view_uiState = UI_TRANSACTION;
-    //UX_MENU_DISPLAY(0, menu_transaction_info, NULL);
+#if defined(TARGET_NANOS)
+    UX_MENU_DISPLAY(0, menu_transaction_info, NULL);
+#endif
 }
 
 void view_display_signing_success() {
