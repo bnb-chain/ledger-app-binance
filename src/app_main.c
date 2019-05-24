@@ -27,9 +27,6 @@
 #include <os.h>
 
 #include <string.h>
-#ifdef TARGET_NANOX
-#include "glyphs.h"
-#endif
 
 #ifdef TESTING_ENABLED
 // Generate using always the same private data
