@@ -33,7 +33,7 @@ include $(BOLOS_SDK)/Makefile.defines
 APPNAME="Binance Chain"
 APPVERSION_M=1
 APPVERSION_N=1
-APPVERSION_P=4
+APPVERSION_P=5
 
 APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path "44'/714'"
 
