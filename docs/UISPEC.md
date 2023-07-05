@@ -22,7 +22,7 @@ UI Specification
 Screen 1. (default)
 ```
 LINE1:
-LINE2:                      Binance Chain
+LINE2:                      BNB Chain
 LINE3: [tendermint icon]    Ready           [down icon]
 ```
 

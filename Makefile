@@ -1,6 +1,6 @@
 #*******************************************************************************
 #   Ledger App
-#   (c) 2019 Binance
+#   (c) 2019 All BNB Chain Developers
 #   (c) 2018 ZondaX GmbH
 #   (c) 2017 Ledger
 #
